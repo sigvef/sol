@@ -46,14 +46,14 @@ function init(){
     material = new THREE.MeshLambertMaterial({color:0xFF0000});
     cubes = [];
     side = 16;
-    size = 10;
-    spacing = 10;
+    x_spacing = 5+2.545;
+    z_spacing = 4.363*2;
     geometry = createHexagonGeometry(10,-10);
     for(var i=0;i<side;i++){
 	    for(var j=0;j<side;j++){
 		    cubes[i*side+j] = new THREE.Mesh(geometry, material);
-		    cubes[i*side+j].position.x = (i-spacing/2)*spacing;
-		    cubes[i*side+j].position.z = (i%2)*spacing/2+(j-spacing/2)*spacing;
+		    cubes[i*side+j].position.x = (i-side/2)*x_spacing;
+		    cubes[i*side+j].position.z = (i%2)*z_spacing/2+(j-side/2)*z_spacing;
 		    scene.add(cubes[i*side+j]);
 	    }
     }

@@ -214,7 +214,7 @@ Midi.prototype.remove_callback = function(callback){
 
 Midi.prototype.play_forward = function(t){
     t *= this.ticks_per_second;
-    t /= 1000;
+    t *= 0.001;
     for(var i=0;i<this.tracks.length;i++){
         this.tracks[i].play_forward(t);
     }

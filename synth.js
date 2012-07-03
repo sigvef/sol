@@ -1,4 +1,3 @@
-
 function Mixer(){
     this.ax = new webkitAudioContext();
     this.jsnode = this.ax.createJavaScriptNode(1024,1,2);
