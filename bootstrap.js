@@ -19,7 +19,7 @@
                     t++;
                     dt-=20;
                 }
-                render(x);
+                renderer.render(scene, camera);
                 requestAnimFrame(loop);
             }
 
