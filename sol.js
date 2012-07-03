@@ -44,15 +44,16 @@ function init(){
     scene = new THREE.Scene();
     scene.add(camera);
     material = new THREE.MeshLambertMaterial({color:0xFF0000});
-    geometry = new THREE.CubeGeometry(10,10,10);
     cubes = [];
     side = 16;
     size = 10;
+    spacing = 10;
+    geometry = new THREE.CubeGeometry(size,size,size);
     for(var i=0;i<side;i++){
     for(var j=0;j<side;j++){
 	    cubes[i*side+j] = new THREE.Mesh(geometry, material);
-	    cubes[i*side+j].position.x = (i-side/2)*10;
-	    cubes[i*side+j].position.z = (i%2)*5+(j-side/2)*10;
+	    cubes[i*side+j].position.x = (i-spacing/2)*spacing;
+	    cubes[i*side+j].position.z = (i%2)*spacing/2+(j-spacing/2)*spacing;
 	    scene.add(cubes[i*side+j]);
     }
     }
