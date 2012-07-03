@@ -1,4 +1,5 @@
 DEBUG = false;
+ORIGO = new THREE.Vector3(0,0,0);
 
 /* smoothstep interpolaties between a and b, at time t from 0 to 1 */
 function smoothstep(a, b, t){
@@ -12,9 +13,21 @@ function lerp(a,b,t){
 
 
 function update(){
+	camera.position.x = Math.sin(time/10000)*side*8;
+	camera.position.z = Math.cos(time/10000)*side*8;
+	light.position.x = camera.position.x;
+	light.position.y = camera.position.y;
+	light.position.z = camera.position.z;
+	
+	for(var i=0;i<side*side;i++){
+		cubes[i].position.y += 0.1*(0.5-Math.random());
+	}
+	
+    camera.lookAt(ORIGO);
 }
 
-function render(ctx){
+function render(){
+	renderer.render(scene, camera);
 }
 
 
@@ -24,5 +37,24 @@ function init(){
     data = atob(data);
     midi = new Midi(data);
     mixer = new Mixer();
-    midi.add_callback(function(e){mixer.handle_event(e);});
+    //midi.add_callback(function(e){mixer.handle_event(e);});
+    camera = new THREE.PerspectiveCamera(45, 16/9, 0.1, 10000);
+    camera.position.y = 100;
+    
+    scene = new THREE.Scene();
+    scene.add(camera);
+    material = new THREE.MeshLambertMaterial({color:0xFF0000});
+    geometry = new THREE.CubeGeometry(10,10,10);
+    cubes = [];
+    side = 64;
+    for(var i=0;i<side;i++){
+    for(var j=0;j<side;j++){
+	    cubes[i*side+j] = new THREE.Mesh(geometry, material);
+	    cubes[i*side+j].position.x = (i-side/2)*10;
+	    cubes[i*side+j].position.z = (j-side/2)*10;
+	    scene.add(cubes[i*side+j]);
+    }
+    }
+    light = new THREE.PointLight(0xFFFFFF);
+    scene.add(light);
 }
