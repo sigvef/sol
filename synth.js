@@ -1,4 +1,3 @@
-
 function Mixer(){
     this.ax = new webkitAudioContext();
     this.jsnode = this.ax.createJavaScriptNode(1024,1,2);
@@ -37,7 +36,8 @@ function Mixer(){
 
     this.instruments = [];
     for(var i=0;i<16;i++){
-        this.instruments[i] = new Instrument();
+        this.instruments[i] = new Instrument(i);	//oppretter 16 instrumenter
+        //this.instruments[i].generate = function... //kan sette ulike synthfunksjoner på ulike midikanaler
     }
 
     this.handle_event = function(e){
@@ -69,7 +69,8 @@ function Mixer(){
     this.analyser.connect(this.ax.destination);
 }
 
-function Instrument(){
+function Instrument(channel){
+	this.channel = channel;	//midi channel
     this.note_pool = [];
     this.num_active_notes = 0;
     for(var i=0;i<16;i++){
@@ -91,12 +92,13 @@ function Instrument(){
         }
     }
 
-    this.generate = function(t,rate){
+    this.generate = function(t,rate){	//fjern rate-parameteret. dette skal være en konstant (44100). sett den til f.eks 22050 hvis vi har problemer med ytelse
+    	//t enhet: samples
         var out = 0;
         for(var i=0;i<this.num_active_notes;i++){
             out += 0.001*this.note_pool[i].velocity*Math.sin((
                         440*Math.pow(2,(this.note_pool[i].note_number-57)/12)*
-                        t*Math.PI*2/rate))>0?0.05:-0.05;
+                        t*Math.PI*2/rate))>0?0.05:-0.05;	//bytt ut rate med en konstant
         };
         return out;
     }
