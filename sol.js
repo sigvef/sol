@@ -1,4 +1,5 @@
 DEBUG = false;
+ORIGO = new THREE.Vector3(0,0,0);
 
 /* smoothstep interpolaties between a and b, at time t from 0 to 1 */
 function smoothstep(a, b, t){
@@ -12,9 +13,21 @@ function lerp(a,b,t){
 
 
 function update(){
+	camera.position.x = Math.sin(time/10000)*side*8;
+	camera.position.z = Math.cos(time/10000)*side*8;
+	light.position.x = camera.position.x;
+	light.position.y = camera.position.y;
+	light.position.z = camera.position.z;
+	
+	for(var i=0;i<side*side;i++){
+		cubes[i].position.y += 0.1*(0.5-Math.random());
+	}
+	
+    camera.lookAt(ORIGO);
 }
 
-function render(ctx){
+function render(){
+	renderer.render(scene, camera);
 }
 
 
@@ -25,4 +38,60 @@ function init(){
     midi = new Midi(data);
     mixer = new Mixer();
     midi.add_callback(function(e){mixer.handle_event(e);});
+    camera = new THREE.PerspectiveCamera(45, 16/9, 0.1, 10000);
+    camera.position.y = 100;
+    
+    scene = new THREE.Scene();
+    scene.add(camera);
+    material = new THREE.MeshLambertMaterial({color:0xFF0000});
+    cubes = [];
+    side = 16;
+    x_spacing = 5+2.545;
+    z_spacing = 4.363*2;
+    geometry = createHexagonGeometry(10,-10);
+    for(var i=0;i<side;i++){
+	    for(var j=0;j<side;j++){
+		    cubes[i*side+j] = new THREE.Mesh(geometry, material);
+		    cubes[i*side+j].position.x = (i-side/2)*x_spacing;
+		    cubes[i*side+j].position.z = (i%2)*z_spacing/2+(j-side/2)*z_spacing;
+		    scene.add(cubes[i*side+j]);
+	    }
+    }
+    light = new THREE.PointLight(0xFFFFFF);
+    scene.add(light);
 }
+
+function createHexagonGeometry(hy,ly){
+	var geometry = new THREE.Geometry();
+	
+	/* Hexagon geometry from zynaps.com */
+	geometry.vertices.push(new THREE.Vector3(-5.000, hy, 0));
+    geometry.vertices.push(new THREE.Vector3(-2.545, hy, -4.363));
+    geometry.vertices.push(new THREE.Vector3(2.545, hy, -4.363));
+    geometry.vertices.push(new THREE.Vector3(5.000, hy, 0));
+    geometry.vertices.push(new THREE.Vector3(2.545, hy, 4.363));
+    geometry.vertices.push(new THREE.Vector3(-2.545, hy, 4.363));
+    geometry.vertices.push(new THREE.Vector3(-5.000, ly, 0));
+    geometry.vertices.push(new THREE.Vector3(-2.545, ly, -4.363));
+    geometry.vertices.push(new THREE.Vector3(2.545, ly, -4.363));
+    geometry.vertices.push(new THREE.Vector3(5.000, ly, 0));
+    geometry.vertices.push(new THREE.Vector3(2.545, ly, 4.363));
+    geometry.vertices.push(new THREE.Vector3(-2.545, ly, 4.363));
+
+    geometry.faces.push(new THREE.Face3(0, 5, 1));
+    geometry.faces.push(new THREE.Face4(1, 5, 4, 2));
+    geometry.faces.push(new THREE.Face3(2, 4, 3));
+    geometry.faces.push(new THREE.Face3(6, 7, 11));
+    geometry.faces.push(new THREE.Face4(7, 8, 10, 11));
+    geometry.faces.push(new THREE.Face3(8, 9, 10));
+    geometry.faces.push(new THREE.Face4(0, 1, 7, 6));
+    geometry.faces.push(new THREE.Face4(1, 2, 8, 7));
+    geometry.faces.push(new THREE.Face4(2, 3, 9, 8));
+    geometry.faces.push(new THREE.Face4(3, 4, 10, 9));
+    geometry.faces.push(new THREE.Face4(4, 5, 11, 10));
+    geometry.faces.push(new THREE.Face4(5, 0, 6, 11));
+    
+    geometry.computeFaceNormals(false);
+    return geometry;
+}
+

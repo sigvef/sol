@@ -19,7 +19,7 @@
                     t++;
                     dt-=20;
                 }
-                render(x);
+                render();
                 requestAnimFrame(loop);
             }
 
@@ -35,10 +35,6 @@
 
             function bootstrap(){
                 renderer = new THREE.WebGLRenderer();
-                camera = new THREE.PerspectiveCamera(45, 16/9, 0.1, 10000);
-                scene = new THREE.Scene();
-                scene.add(camera);
-                camera.position.z = 300;
                 resize();
                 document.body.appendChild(renderer.domElement);
                 setTimeout(start,0);
