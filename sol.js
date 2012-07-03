@@ -37,7 +37,7 @@ function init(){
     data = atob(data);
     midi = new Midi(data);
     mixer = new Mixer();
-    //midi.add_callback(function(e){mixer.handle_event(e);});
+    midi.add_callback(function(e){mixer.handle_event(e);});
     camera = new THREE.PerspectiveCamera(45, 16/9, 0.1, 10000);
     camera.position.y = 100;
     
