@@ -28,7 +28,6 @@ function Mixer(){
             }
             datar[i] = datal[i];
             this.t++;
-
         }
 
     };
@@ -50,6 +49,7 @@ function Mixer(){
 
     this.analyser = this.ax.createAnalyser();
     this.convolver = this.ax.createConvolver();
+    this.gainNode = this.ax.createGainNode();
     var buffer = this.ax.createBuffer(2,44110*3,44110);
     var channeldatal = buffer.getChannelData(0);
     var channeldatar = buffer.getChannelData(1);
@@ -62,10 +62,18 @@ function Mixer(){
         channeldatar[i] = (2*Math.random()-1)/(i/10000);
     }
     this.convolver.buffer = buffer;
+    
+    this.jsnode.connect(this.gainNode);
     this.jsnode.connect(this.convolver);
     this.jsnode.connect(this.analyser);
     this.convolver.connect(this.analyser);
-    this.analyser.connect(this.ax.destination);
+    this.analyser.connect(this.gainNode);
+    this.gainNode.connect(this.ax.destination);
+    this.gainNode.gain.value = 0.05;
+
+    this.setVolume = function(v) {
+        this.gainNode.gain.value = v;
+    }
 }
 
 function Instrument(){
