@@ -46,12 +46,13 @@ function init(){
     material = new THREE.MeshLambertMaterial({color:0xFF0000});
     geometry = new THREE.CubeGeometry(10,10,10);
     cubes = [];
-    side = 64;
+    side = 16;
+    size = 10;
     for(var i=0;i<side;i++){
     for(var j=0;j<side;j++){
 	    cubes[i*side+j] = new THREE.Mesh(geometry, material);
 	    cubes[i*side+j].position.x = (i-side/2)*10;
-	    cubes[i*side+j].position.z = (j-side/2)*10;
+	    cubes[i*side+j].position.z = (i%2)*5+(j-side/2)*10;
 	    scene.add(cubes[i*side+j]);
     }
     }
