@@ -2,50 +2,15 @@
 <html>
     <head>
         <title></title>
-        <script src="sol2d.js"></script>
-        <script src="bootstrap2d.js"></script>
+        <script src="Three.js"></script>
+        <script src="sol.js"></script>
+        <script src="bootstrap.js"></script>
         <script src="midi.js"></script>
         <script src="synth.js"></script>
         <style>
             body,html{background:#000;padding:0;margin:0;border:0;outline:0;}
             canvas{background:#fff;}
         </style>
-        <script id="vs" type="x-shader/vertex"> 
-
-            attribute vec3 position;
-
-            void main() {
-
-                gl_Position = vec4( position, 1.0 );
-
-            }
-
-        </script> 
-
-        <script id="fs" type="x-shader/fragment"> 
-            uniform float time;
-            uniform float direction;
-            uniform vec2 resolution;
-            uniform sampler2D partpos;  
-            uniform float fade_to_black;
-
-            void main( void ) {
-
-                vec2 position = - 1.0 + 2.0 * gl_FragCoord.xy / resolution.xy;
-                vec2 uv;
-                float angle = sin(time*0.01)+atan(position.x, position.y);
-                float radius = sin(time*0.02)*0.2*abs(sin(angle*2.0))+sqrt(dot(position,position));
-
-                uv.x = direction*.0075*time+.1/radius;
-                uv.y = angle/3.1416;
-
-                vec3 col = texture2D(partpos, uv).xyz;
-
-
-                gl_FragColor = vec4(fade_to_black*col*radius*radius*2.,1.0);
-            }
-
-        </script> 
     </head>
     <body onload="bootstrap()">
     </body>
