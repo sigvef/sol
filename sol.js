@@ -46,7 +46,7 @@ function init(){
     material = new THREE.MeshLambertMaterial({color:0xFF0000});
     geometry = new THREE.CubeGeometry(10,10,10);
     cubes = [];
-    side = 64;
+    side = 32; // Highest round number with smooth rendering on Stian's mac
     for(var i=0;i<side;i++){
     for(var j=0;j<side;j++){
 	    cubes[i*side+j] = new THREE.Mesh(geometry, material);
