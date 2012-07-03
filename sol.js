@@ -48,15 +48,50 @@ function init(){
     side = 16;
     size = 10;
     spacing = 10;
-    geometry = new THREE.CubeGeometry(size,size,size);
+    geometry = createHexagonGeometry(10,-10);
     for(var i=0;i<side;i++){
-    for(var j=0;j<side;j++){
-	    cubes[i*side+j] = new THREE.Mesh(geometry, material);
-	    cubes[i*side+j].position.x = (i-spacing/2)*spacing;
-	    cubes[i*side+j].position.z = (i%2)*spacing/2+(j-spacing/2)*spacing;
-	    scene.add(cubes[i*side+j]);
-    }
+	    for(var j=0;j<side;j++){
+		    cubes[i*side+j] = new THREE.Mesh(geometry, material);
+		    cubes[i*side+j].position.x = (i-spacing/2)*spacing;
+		    cubes[i*side+j].position.z = (i%2)*spacing/2+(j-spacing/2)*spacing;
+		    scene.add(cubes[i*side+j]);
+	    }
     }
     light = new THREE.PointLight(0xFFFFFF);
     scene.add(light);
 }
+
+function createHexagonGeometry(hy,ly){
+	var geometry = new THREE.Geometry();
+	
+	/* Hexagon geometry from zynaps.com */
+	geometry.vertices.push(new THREE.Vector3(-5.000, hy, 0));
+    geometry.vertices.push(new THREE.Vector3(-2.545, hy, -4.363));
+    geometry.vertices.push(new THREE.Vector3(2.545, hy, -4.363));
+    geometry.vertices.push(new THREE.Vector3(5.000, hy, 0));
+    geometry.vertices.push(new THREE.Vector3(2.545, hy, 4.363));
+    geometry.vertices.push(new THREE.Vector3(-2.545, hy, 4.363));
+    geometry.vertices.push(new THREE.Vector3(-5.000, ly, 0));
+    geometry.vertices.push(new THREE.Vector3(-2.545, ly, -4.363));
+    geometry.vertices.push(new THREE.Vector3(2.545, ly, -4.363));
+    geometry.vertices.push(new THREE.Vector3(5.000, ly, 0));
+    geometry.vertices.push(new THREE.Vector3(2.545, ly, 4.363));
+    geometry.vertices.push(new THREE.Vector3(-2.545, ly, 4.363));
+
+    geometry.faces.push(new THREE.Face3(0, 5, 1));
+    geometry.faces.push(new THREE.Face4(1, 5, 4, 2));
+    geometry.faces.push(new THREE.Face3(2, 4, 3));
+    geometry.faces.push(new THREE.Face3(6, 7, 11));
+    geometry.faces.push(new THREE.Face4(7, 8, 10, 11));
+    geometry.faces.push(new THREE.Face3(8, 9, 10));
+    geometry.faces.push(new THREE.Face4(0, 1, 7, 6));
+    geometry.faces.push(new THREE.Face4(1, 2, 8, 7));
+    geometry.faces.push(new THREE.Face4(2, 3, 9, 8));
+    geometry.faces.push(new THREE.Face4(3, 4, 10, 9));
+    geometry.faces.push(new THREE.Face4(4, 5, 11, 10));
+    geometry.faces.push(new THREE.Face4(5, 0, 6, 11));
+    
+    geometry.computeFaceNormals(false);
+    return geometry;
+}
+
