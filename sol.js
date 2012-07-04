@@ -20,7 +20,8 @@ function update(){
 	light.position.z = camera.position.z;
 	
 	for(var i=0;i<side*side;i++){
-		cubes[i].position.y += 0.1*(0.5-Math.random());
+		cubes[i].mesh.position.y += 0.1*(0.5-Math.random());
+		cubes[i].update();
 	}
 	
     camera.lookAt(ORIGO);
@@ -40,27 +41,54 @@ function init(){
     midi = new Midi(data);
     mixer = new Mixer();
     midi.add_callback(function(e){mixer.handle_event(e);});
+    midi.add_callback(function(e){
+    	if(e.type == 0x9){
+    		cubes[e.note_number].blink();
+    	}
+    });
     camera = new THREE.PerspectiveCamera(45, 16/9, 0.1, 10000);
     camera.position.y = 100;
     
     scene = new THREE.Scene();
     scene.add(camera);
-    material = new THREE.MeshLambertMaterial({color:0xFF0000});
     cubes = [];
-    side = 24;
+    side = 12;
     x_spacing = 5+2.545;
     z_spacing = 4.363*2;
     geometry = createHexagonGeometry(10,-10);
     for(var i=0;i<side;i++){
 	    for(var j=0;j<side;j++){
-		    cubes[i*side+j] = new THREE.Mesh(geometry, material);
-		    cubes[i*side+j].position.x = (i-side/2)*x_spacing;
-		    cubes[i*side+j].position.z = (i%2)*z_spacing/2+(j-side/2)*z_spacing;
-		    scene.add(cubes[i*side+j]);
+	    	cubes[i*side+j] = new Hexagon();
+	    	var material = new THREE.MeshLambertMaterial({color:0xFF0000});
+		    cubes[i*side+j].mesh = new THREE.Mesh(geometry, material);
+		    cubes[i*side+j].mesh.position.x = (i-side/2)*x_spacing;
+		    cubes[i*side+j].mesh.position.z = (i%2)*z_spacing/2+(j-side/2)*z_spacing;
+		    scene.add(cubes[i*side+j].mesh);
 	    }
     }
     light = new THREE.PointLight(0xFFFFFF);
     scene.add(light);
+}
+
+function Hexagon(){
+}
+
+Hexagon.prototype.blink = function(){
+	this.mesh.material.color.r = 1;
+	this.mesh.material.color.g = 1;
+	this.mesh.material.color.b = 1;
+}
+
+Hexagon.prototype.update = function(){
+	if(this.mesh.material.color.r > 0.5){
+		this.mesh.material.color.r -= 0.1;
+	}
+	if(this.mesh.material.color.g > 0.5){
+		this.mesh.material.color.g -= 0.1;
+	}
+	if(this.mesh.material.color.b > 0.5){
+		this.mesh.material.color.b -= 0.1;
+	}
 }
 
 function createHexagonGeometry(hy,ly){
