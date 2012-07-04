@@ -197,11 +197,11 @@ Midi.prototype.read_vlf = read_vlf;
 
 Midi.prototype.set_microseconds_per_quaver = function(microseconds_per_quaver){
     this.ticks_per_second = this.ticks_per_beat / (microseconds_per_quaver/1000000);
-}
+};
 
 Midi.prototype.add_callback = function(callback){
     this.callbacks.push(callback);
-}
+};
 
 Midi.prototype.remove_callback = function(callback){
     for(var i in this.callbacks){
@@ -210,14 +210,14 @@ Midi.prototype.remove_callback = function(callback){
             break;
        }
     }
-}
+};
 
 Midi.prototype.play_forward = function(t){
     t *= this.ticks_per_second * 0.001;
     for(var i=0;i<this.tracks.length;i++){
         this.tracks[i].play_forward(t);
     }
-}
+};
 
 Track.prototype.play_forward = function(t){
     if(!this.active) return;
@@ -232,13 +232,13 @@ Track.prototype.play_forward = function(t){
             break;
         }
     }
-}
+};
 
 Midi.prototype.fire_event = function(event){
     for(var i=0;i<this.callbacks.length;i++){
         this.callbacks[i](event);
     }
-}
+};
 
 Track.prototype.read_byte = read_byte;
 Track.prototype.read_word = read_word;
