@@ -45,7 +45,7 @@ function init(){
     scene.add(camera);
     material = new THREE.MeshLambertMaterial({color:0xFF0000});
     cubes = [];
-    side = 16;
+    side = 24;
     x_spacing = 5+2.545;
     z_spacing = 4.363*2;
     geometry = createHexagonGeometry(10,-10);
