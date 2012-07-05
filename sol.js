@@ -152,7 +152,10 @@ kewbe.scaler = 256;
 
 function render() {
 	if (t > 3500) {
-		camera.position.y+=0.1;
+		camera.position.y = Math.sin((t-3500)/100)*1000;
+		camera.position.x = Math.sin((t-3500)/100)*200;
+		camera.position.z = Math.cos((t-3500)/100)*200;
+		camera.lookAt(ORIGO);
 		for ( var i = 0; i < kewbe.points.length; i++) {
 
 			var d = {
@@ -164,6 +167,7 @@ function render() {
 						- Math.sin(kewbe.camera.pitch)
 						* (kewbe.points[i].z - kewbe.camera.z),
 				y : Math.sin(kewbe.camera.yaw)
+				
 						* (Math.cos(kewbe.camera.pitch)
 								* (kewbe.points[i].z - kewbe.camera.z) + Math
 								.sin(kewbe.camera.pitch)
