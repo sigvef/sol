@@ -1,10 +1,10 @@
+tsamples = 0;
 function Mixer(){
     this.ax = new webkitAudioContext();
     this.jsnode = this.ax.createJavaScriptNode(1024,1,2);
 
     this.note_number = 0;
     this.velocity = 0;
-    this.t = 0;
 
     var that = this;
     this.jsnode.onaudioprocess = function(e){that.process(e);};
@@ -23,11 +23,11 @@ function Mixer(){
             }
             datal[i] = 0;
             for(var j=0;j<this.instruments.length;j++){
-                datal[i] += this.instruments[j].generate(this.t);
+        		datal[i] += this.instruments[j].generate(tsamples);
                 //datal[i] += Math.random()*0.01;
             }
             datar[i] = datal[i];
-            this.t++;
+            tsamples++;
         }
 
     };
@@ -40,9 +40,9 @@ function Mixer(){
     }
 
     this.handle_event = function(e){
-        if(e.type == 0x9){
+        if(e.type == 0x9){	//note on
             this.instruments[e.midi_channel].note_on(e.note_number, e.velocity);
-        }else if(e.type == 0x8){
+        }else if(e.type == 0x8){	//note off
             this.instruments[e.midi_channel].note_off(e.note_number, e.velocity);
         }
     };
@@ -82,12 +82,13 @@ function Instrument(channel){
     this.note_pool = [];
     this.num_active_notes = 0;
     for(var i=0;i<16;i++){
-        this.note_pool[i] = {note_number:0,velocity:0};
+        this.note_pool[i] = {note_number:0,velocity:0,tstart:0};
     }
 
     this.note_on = function(note_number, velocity){
         this.note_pool[this.num_active_notes].note_number = note_number;
         this.note_pool[this.num_active_notes].velocity = velocity;
+        this.note_pool[this.num_active_notes].tstart = tsamples;
         this.num_active_notes++;
     };
 
@@ -150,9 +151,11 @@ function instruments(instrument) {
 		return function(t) {	//Sine
 		this.out = 0;
 		for(var i=0;i<this.num_active_notes;i++){
-			this.out += A*this.note_pool[i].velocity*sin(
+			var delta = tsamples - this.note_pool[i].tstart;	//time in samples since note started
+			this.out += 0.0002*Math.min(5000, delta)*A*this.note_pool[i].velocity*sin(
 					(note2freq[this.note_pool[i].note_number]*t*128/RATE));
 		};
+		
 		return this.out;
 	};
 	case 4:
