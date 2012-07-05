@@ -137,6 +137,7 @@ function instruments(instrument) {
 		    return this.out;
 		};
 	case 1:
+	case 3:
 		return function(t) {	//Saw
 		this.out = 0;
 		for(var i=0;i<this.num_active_notes;i++){
@@ -154,7 +155,7 @@ function instruments(instrument) {
 		};
 		return this.out;
 	};
-	case 3:
+	case 4:
 		return function(t) {	//White noise
 			this.out = 0;
 			for(var i=0;i<this.num_active_notes;i++){
@@ -162,7 +163,7 @@ function instruments(instrument) {
 			}
 			return this.out;
 		};
-	case 4:
+	case 5:
 		return function(t) {	//Etc....
 		this.out = 0;
 		//magic goes here
