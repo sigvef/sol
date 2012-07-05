@@ -15,7 +15,7 @@ function lerp(a,b,t){
 function update(){
 	camera.position.x = Math.sin(time/10000)*side*8;
 	camera.position.z = Math.cos(time/10000)*side*8;
-	light.position.x = camera.position.x;
+	light.position.x = -camera.position.x;
 	light.position.y = camera.position.y;
 	light.position.z = camera.position.z;
 	
@@ -63,6 +63,7 @@ function init(){
     camera = new THREE.PerspectiveCamera(45, 16/9, 0.1, 10000);
     camera.position.y = 100;
     
+    renderer.shadowMapEnabled = true;
     scene = new THREE.Scene();
     scene.add(camera);
     cubes = [];
@@ -77,10 +78,13 @@ function init(){
 		    cubes[i*side+j].mesh = new THREE.Mesh(geometry, material);
 		    cubes[i*side+j].mesh.position.x = (i-side/2)*x_spacing;
 		    cubes[i*side+j].mesh.position.z = (i%2)*z_spacing/2+(j-side/2)*z_spacing;
+		    cubes[i*side+j].mesh.castShadow = true;
+		    cubes[i*side+j].mesh.receiveShadow = true;
 		    scene.add(cubes[i*side+j].mesh);
 	    }
     }
-    light = new THREE.PointLight(0xFFFFFF);
+    light = new THREE.SpotLight(0xFFFFFF);
+    light.castShadow = true;
     scene.add(light);
 }
 
