@@ -27,10 +27,120 @@ function update(){
 	}
 	
     camera.lookAt(ORIGO);
+    
+    for(var i=0;i<kewbe.points.length;i++){
+        kewbe.points[i] = kewbe.rotate({axis:"y",point:kewbe.points[i],angle:0.017});
+        kewbe.points[i] = kewbe.rotate({axis:"z",point:kewbe.points[i],angle:0.01});
+        kewbe.points[i] = kewbe.rotate({axis:"x",point:kewbe.points[i],angle:0.004});
+	}
 }
 
+kewbe = {};
+kewbe.points = [
+              {x:100,y:100,z:100},
+              {x:100,y:100,z:-100},
+              {x:100,y:-100,z:100},
+              {x:100,y:-100,z:-100},
+              {x:-100,y:100,z:100},
+              {x:-100,y:100,z:-100},
+              {x:-100,y:-100,z:100},
+              {x:-100,y:-100,z:-100}
+           ];
+
+  kewbe.flat = [
+          {x:0,y:0},
+          {x:0,y:0},
+          {x:0,y:0},
+          {x:0,y:0},
+          {x:0,y:0},
+          {x:0,y:0},
+          {x:0,y:0},
+          {x:0,y:0},
+      ];
+  
+  kewbe.camera = {x:0,y:0,z:250,pitch:0,yaw:0,roll:0};
+  kewbe.viewer = {x:0, y:0,z:-300};
+  kewbe.rotate = function(args){
+	  var ans = {x:0,y:0,z:0};
+	    if(args.axis == "x"){
+	        ans.x = args.point.x;
+	        ans.y = Math.cos(args.angle)*args.point.y-Math.sin(args.angle)*args.point.z;
+	        ans.z = Math.sin(args.angle)*args.point.y+Math.cos(args.angle)*args.point.z;
+	    }
+	    else if(args.axis == "y"){
+	        ans.x = Math.cos(args.angle)*args.point.x+Math.sin(args.angle)*args.point.z;
+	        ans.y = args.point.y;
+	        ans.z = -Math.sin(args.angle)*args.point.x+Math.cos(args.angle)*args.point.z;
+	    }
+	    else if(args.axis == "z"){
+	        ans.x = Math.cos(args.angle)*args.point.x-Math.sin(args.angle)*args.point.y;
+	        ans.y = Math.sin(args.angle)*args.point.x+Math.cos(args.angle)*args.point.y;
+	        ans.z = args.point.z;
+	    }
+	    return ans;
+  }
+
+ kewbe.scaler  = 256;
+  
 function render(){
+	if(t>3500){
+	for(var i=0;i<kewbe.points.length;i++){
+        
+        var d = {
+        x: Math.cos(kewbe.camera.pitch)*(Math.sin(kewbe.camera.roll)*(kewbe.points[i].y-kewbe.camera.y)+ Math.cos(kewbe.camera.roll)*(kewbe.points[i].x-kewbe.camera.x))-Math.sin(kewbe.camera.pitch)*(kewbe.points[i].z-kewbe.camera.z),
+        y:Math.sin(kewbe.camera.yaw)*(Math.cos(kewbe.camera.pitch)*(kewbe.points[i].z-kewbe.camera.z)+Math.sin(kewbe.camera.pitch)*(Math.sin(kewbe.camera.roll)*(kewbe.points[i].y-kewbe.camera.y)+Math.cos(kewbe.camera.roll)*(kewbe.points[i].x-kewbe.camera.x)))+Math.cos(kewbe.camera.x)*(Math.cos(kewbe.camera.roll)*(kewbe.points[i].y-kewbe.camera.y)-Math.sin(kewbe.camera.roll)*(kewbe.points[i].x-kewbe.camera.x)),
+z:Math.cos(kewbe.camera.yaw)*(Math.cos(kewbe.camera.pitch)*(kewbe.points[i].z-kewbe.camera.z)+Math.sin(kewbe.camera.pitch)*(Math.sin(kewbe.camera.roll)*(kewbe.points[i].y-kewbe.camera.y)+Math.cos(kewbe.camera.roll)*(kewbe.points[i].x-kewbe.camera.x)))-Math.sin(kewbe.camera.x)*(Math.cos(kewbe.camera.roll)*(kewbe.points[i].y-kewbe.camera.y)-Math.sin(kewbe.camera.roll)*(kewbe.points[i].x-kewbe.camera.x))
+       };
+        
+        kewbe.flat[i].x = (d.x-kewbe.viewer.x)*(kewbe.viewer.z/d.z);
+        kewbe.flat[i].y = (d.y-kewbe.viewer.y)*(kewbe.viewer.z/d.z);
+        
+        
+        
+        var x = (0|(side*(kewbe.scaler+kewbe.flat[i].x) /(2*kewbe.scaler)));
+        var y = (0|(side*(kewbe.scaler+kewbe.flat[i].y) /(2*kewbe.scaler)));
+        //cubes[side*(0|(side*(kewbe.scaler/2+kewbe.flat[i].x)/kewbe.scaler))+ (0|(side*kewbe.scaler/2+kewbe.flat[i].y)/kewbe.scaler)].punch(1,1,1);
+        var index = x*(side)+y;
+        kewbe.flat[i].draw = false;
+        if(index < cubes.length && index >= 0){
+        	var intensity = (kewbe.points[i].z + kewbe.scaler)/(2*kewbe.scaler);
+    		kewbe.flat[i].index = index;
+    		kewbe.flat[i].intensity = intensity;
+        }
+        vtv(kewbe.flat[0],kewbe.flat[1]);
+        vtv(kewbe.flat[0],kewbe.flat[2]);
+        vtv(kewbe.flat[0],kewbe.flat[4]);
+        vtv(kewbe.flat[1],kewbe.flat[5]);
+        vtv(kewbe.flat[1],kewbe.flat[3]);
+        vtv(kewbe.flat[2],kewbe.flat[3]);
+        vtv(kewbe.flat[2],kewbe.flat[6]);
+        vtv(kewbe.flat[3],kewbe.flat[7]);
+        vtv(kewbe.flat[4],kewbe.flat[5]);
+        vtv(kewbe.flat[4],kewbe.flat[6]);
+        vtv(kewbe.flat[5],kewbe.flat[7]);
+        vtv(kewbe.flat[6],kewbe.flat[7]);
+        //vtv(kewbe.flat[0].index, kewbe.flat[1].index);
+    }
+	}
 	renderer.render(scene, camera);
+}
+
+function vtv(a,b){
+	
+		var ax = 0|(a.index/side);
+		var ay = a.index%side;
+		var bx = 0|(b.index/side);
+		var by = b.index%side;
+		
+		for(var i=0;i<=1;i+=0.1){
+			var intensity = lerp(a.intensity,b.intensity,i);
+			var x = 0|lerp(ax,bx,i);
+			var y = 0|lerp(ay,by,i);
+			if(x < side && x >= 0 && y < side && y >= 0){
+				var idx = (x*side + y);
+				cubes[idx].punch(intensity,intensity,intensity);
+			}
+		}
 }
 
 COLORS = [
@@ -98,6 +208,14 @@ function init(){
 
 function Hexagon(){
 	this.held = false;
+}
+
+Hexagon.prototype.punch = function(r,g,b){
+	if(!this.held){
+		this.mesh.material.color.r = r;
+		this.mesh.material.color.g = g;
+		this.mesh.material.color.b = b;
+	}
 }
 
 Hexagon.prototype.hold = function(r,g,b){
