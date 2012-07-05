@@ -13,11 +13,14 @@ function lerp(a,b,t){
 
 
 function update(){
-	camera.position.x = Math.sin(time/10000)*side*8;
-	camera.position.z = Math.cos(time/10000)*side*8;
+	camera.position.x = Math.sin(t/200)*side*8;
+	camera.position.z = Math.cos(t/200)*side*8;
 	light.position.x = -camera.position.x;
 	light.position.y = camera.position.y;
 	light.position.z = camera.position.z;
+	light2.position.x = -camera.position.x;
+	light2.position.y = camera.position.y;
+	light2.position.z = -camera.position.z;
 	
 	for(var i=0;i<side*side;i++){
 		cubes[i].update();
@@ -83,9 +86,14 @@ function init(){
 		    scene.add(cubes[i*side+j].mesh);
 	    }
     }
-    light = new THREE.SpotLight(0xFFFFFF);
+    light = new THREE.SpotLight(0xFF8888);
     light.castShadow = true;
+    light.intensity = 0.5;
     scene.add(light);
+    light2 = new THREE.SpotLight(0x88FF88);
+    light2.intensity = 0.5;
+    light2.castShadow = true;
+    scene.add(light2);
 }
 
 function Hexagon(){
@@ -104,24 +112,25 @@ Hexagon.prototype.release = function(){
 }
 
 Hexagon.prototype.update = function(){
+	var threshold = 0.2;
 	if(!this.held){
-	if(this.mesh.material.color.r > 0.5){
+	if(this.mesh.material.color.r > threshold){
 		this.mesh.material.color.r *= 0.9;
 	}
-	if(this.mesh.material.color.r < 0.5){
-		this.mesh.material.color.r = 0.5;
+	if(this.mesh.material.color.r < threshold){
+		this.mesh.material.color.r = threshold;
 	}
-	if(this.mesh.material.color.g > 0.5){
+	if(this.mesh.material.color.g > threshold){
 		this.mesh.material.color.g *= 0.9;
 	}
-	if(this.mesh.material.color.g < 0.5){
-		this.mesh.material.color.g = 0.5;
+	if(this.mesh.material.color.g < threshold){
+		this.mesh.material.color.g = threshold;
 	}
-	if(this.mesh.material.color.b > 0.5){
+	if(this.mesh.material.color.b > threshold){
 		this.mesh.material.color.b *= 0.9;
 	}
-	if(this.mesh.material.color.b < 0.5){
-		this.mesh.material.color.b = 0.5;
+	if(this.mesh.material.color.b < threshold){
+		this.mesh.material.color.b = threshold;
 	}
 	}
 	
