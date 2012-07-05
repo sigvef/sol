@@ -13,7 +13,7 @@ function Mixer(){
 
         var datal = e.outputBuffer.getChannelData(0);
         var datar = e.outputBuffer.getChannelData(1);
-        var rate = 44110;
+        var rate = 44100;
         var play_forward_trigger = 0;
         for(var i=0;i<datal.length;i++){
             play_forward_trigger++;
