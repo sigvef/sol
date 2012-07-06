@@ -10,14 +10,14 @@
             })();
 
             function loop(){
-                dt += (time-old_time);
-                old_time = time;
-                time = t;
-                dt = dt%1000;
-                while(dt>20){
+                dt += (t-old_time);
+                old_time = t;
+                while(dt> 882){
                     update();
-                    dt-=20;
+                    dt-= 882;
+                    console.log(dt);
                 }
+                console.log("render");
                 render();
                 requestAnimFrame(loop);
             }

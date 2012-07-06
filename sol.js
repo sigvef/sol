@@ -12,8 +12,8 @@ function lerp(a, b, t) {
 }
 
 function update() {
-	camera.position.x = Math.sin(t / 200) * side * 8;
-	camera.position.z = Math.cos(t / 200) * side * 8;
+	camera.position.x = Math.sin(t / (200*2205)) * side * 8;
+	camera.position.z = Math.cos(t / (200*2205)) * side * 8;
 	light.position.x = -camera.position.x;
 	light.position.y = camera.position.y;
 	light.position.z = camera.position.z;
@@ -32,10 +32,10 @@ function update() {
 
 
 function render() {
-	if (t > 3500) {
-		camera.position.y = Math.sin((t - 3500) / 300) * 500;
-		camera.position.x = Math.sin((t - 3500) / 100) * 200;
-		camera.position.z = Math.cos((t - 3500) / 100) * 200;
+	if (t > 3500*2205) {
+		camera.position.y = Math.sin((t - 3500*2205) / (300*2205)) * 500;
+		camera.position.x = Math.sin((t - 3500*2205) / (100*2205)) * 200;
+		camera.position.z = Math.cos((t - 3500*2205) / (100*2205)) * 200;
 		camera.lookAt(ORIGO);
 		kewbe.render();
 	}
