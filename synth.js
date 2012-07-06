@@ -1,4 +1,4 @@
-tsamples = 0;
+t = 0;
 function Mixer(){
     this.ax = new webkitAudioContext();
     this.jsnode = this.ax.createJavaScriptNode(1024,1,2);
@@ -22,11 +22,11 @@ function Mixer(){
             }
             datal[i] = 0;
             for(var j=0;j<this.instruments.length;j++){
-        		datal[i] += this.instruments[j].generate(tsamples);
+        		datal[i] += this.instruments[j].generate(t);
                 //datal[i] += Math.random()*0.01;
             }
             datar[i] = datal[i];
-            tsamples++;
+            t++;
         }
 
     };
@@ -87,7 +87,7 @@ function Instrument(channel){
     this.note_on = function(note_number, velocity){
         this.note_pool[this.num_active_notes].note_number = note_number;
         this.note_pool[this.num_active_notes].velocity = velocity;
-        this.note_pool[this.num_active_notes].tstart = tsamples;
+        this.note_pool[this.num_active_notes].tstart = t;
         this.num_active_notes++;
     };
 
@@ -150,7 +150,7 @@ function instruments(instrument) {
 		return function(t) {	//Sine
 		this.out = 0;
 		for(var i=0;i<this.num_active_notes;i++){
-			var delta = tsamples - this.note_pool[i].tstart;	//time in samples since note started
+			var delta = t - this.note_pool[i].tstart;	//time in samples since note started
 			this.out += 0.0002*Math.min(5000, delta)*A*this.note_pool[i].velocity*sin(
 					(note2freq[this.note_pool[i].note_number]*t*128/RATE));
 		};
