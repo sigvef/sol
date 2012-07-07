@@ -1,4 +1,5 @@
-            window.requestAnimFrame = (function(){
+FRAME_LENGTH = 882;
+window.requestAnimFrame = (function(){
                 return  window.requestAnimationFrame       || 
                 window.webkitRequestAnimationFrame || 
                 window.mozRequestAnimationFrame    || 
@@ -12,9 +13,9 @@
             function loop(){
                 dt += (t-old_time);
                 old_time = t;
-                while(dt> 882){
+                while(dt> FRAME_LENGTH){
                     update();
-                    dt-= 882;
+                    dt-= FRAME_LENGTH;
                 }
                 render();
                 requestAnimFrame(loop);

@@ -1,3 +1,5 @@
+NO_OVERRIDE = 1;
+FINISH_PREVIOUS = 2;
 DEBUG = false;
 ORIGO = new THREE.Vector3(0, 0, 0);
 
@@ -12,8 +14,10 @@ function lerp(a, b, t) {
 }
 
 analyserData = new Uint8Array(256);
+
 function update() {
 	
+	mixer.analyser.getByteFrequencyData(analyserData);
 	camera.position.x = Math.sin(t / (200*2205)) * side * 8;
 	camera.position.z = Math.cos(t / (200*2205)) * side * 8;
 	light.position.x = -camera.position.x;
@@ -23,7 +27,15 @@ function update() {
 	light2.position.y = camera.position.y;
 	light2.position.z = -camera.position.z;
 
+	var samples_per_hemiquaver = midi.ticks_per_beat/midi.ticks_per_second * 44100 * 0.5;
 	for ( var i = 0; i < side * side; i++) {
+		if(t>2112512){
+		cubes[i].setGoalPosition(
+			i*Math.sin(i/1000000*t),
+			0,
+			i*Math.cos(i/1000000*t),
+		 samples_per_hemiquaver*2, FINISH_PREVIOUS);
+		}
 		cubes[i].update();
 	}
 
@@ -31,7 +43,6 @@ function update() {
 
 	kewbe.update();
 	lyte.update();
-	
 }
 
 
@@ -101,19 +112,37 @@ function init() {
 	midi.add_callback(function(e) {
 		mixer.handle_event(e);
 	});
-	/*
 	midi.add_callback(function(e) {
 		if (e.type == 0x9) {
-			cubes[e.note_number + e.midi_channel * 50].hold(
-					COLORS[e.midi_channel].r, COLORS[e.midi_channel].g,
-					COLORS[e.midi_channel].b);
+			cubes[e.note_number].setGoalPosition(
+					cubes[e.note_number].mesh.position.x,
+					e.velocity/10,
+					cubes[e.note_number].mesh.position.z,
+					0
+					);
+			cubes[e.note_number].setGoalColor(
+					COLORS[e.midi_channel].r,
+					COLORS[e.midi_channel].g,
+					COLORS[e.midi_channel].b,
+					0
+					);
 		} else if (e.type == 0x8) {
-			cubes[e.note_number + e.midi_channel * 50].release();
+			cubes[e.note_number].setGoalPosition(
+					cubes[e.note_number].mesh.position.x,
+					0,
+					cubes[e.note_number].mesh.position.z,
+					FRAME_LENGTH*5
+					);
+			cubes[e.note_number].setGoalColor(
+					1,
+					1,
+					1,
+FRAME_LENGTH*5
+					);
 		}
 	});
-	*/
 	camera = new THREE.PerspectiveCamera(45, 16 / 9, 0.1, 10000);
-	camera.position.y = 100;
+	camera.position.y = 120;
 
 	renderer.shadowMapEnabled = true;
 	scene = new THREE.Scene();
@@ -168,25 +197,34 @@ function Hexagon(x,y,z) {
 	this.goalRotationTime = 0;
 }
 
-Hexagon.prototype.setGoalColor = function(goalColor, goalTime){
+Hexagon.prototype.setGoalColor = function(r,g,b, goalTime, flags){
+	if((flags&NO_OVERRIDE) && t<this.goalColorTime) return;
+	this.startColor = (flags&FINISH_PREVIOUS) ? this.goalColor:this.mesh.color;
 	this.startColor = this.mesh.material.color;
-	this.goalColor = goalColor;
+	this.goalColor.r = r;
+	this.goalColor.g = g;
+	this.goalColor.b = b;
 	this.startColorTime = t;
-	this.goalColorTime = goalTime;
+	this.goalColorTime = t+goalTime;
 }
 
-Hexagon.prototype.setGoalPosition = function(goalPosition, goalTime){
-	this.startPosition = this.mesh.position;
-	this.goalPosition = goalPosition;
+Hexagon.prototype.setGoalPosition = function(x,y,z, goalTime, flags){
+	if((flags&NO_OVERRIDE) && t<this.goalPositionTime) return;
+	this.startPosition = (flags&FINISH_PREVIOUS) ? this.goalPosition:this.mesh.position;
+	this.goalPosition.x = x;
+	this.goalPosition.y = y;
+	this.goalPosition.z = z;
 	this.startPositionTime = t;
-	this.goalPositionTime = goalTime;
+	this.goalPositionTime = t+goalTime;
 }
 
-Hexagon.prototype.setGoalRotation = function(goalRotation, goalTime){
+Hexagon.prototype.setGoalRotation = function(goalRotation, flags){
+	if((flags&NO_OVERRIDE) && t<this.goalRotationTime) return;
+	this.startRotation = (flags&FINISH_PREVIOUS) ? this.goalRotation:this.mesh.rotation;
 	this.startRotation = this.mesh.rotation;
 	this.goalRotation = goalRotation;
 	this.startRotationTime = t;
-	this.goalRotationTime = goalTime;
+	this.goalRotationTime = t+goalTime;
 }
 
 Hexagon.prototype.punch = function(r, g, b) {
