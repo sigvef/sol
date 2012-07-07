@@ -132,17 +132,17 @@ function init() {
 			scene.add(cubes[i * side + j].mesh);
 		}
 	}
-	light = new THREE.SpotLight(0xFF8888);
+	light = new THREE.SpotLight(0xF98988);
 	light.castShadow = true;
 	light.intensity = 0.5;
 	scene.add(light);
-	light2 = new THREE.SpotLight(0x88FF88);
+	light2 = new THREE.SpotLight(0xF88808);
 	light2.intensity = 1;
 	light2.castShadow = true;
-	//scene.add(light2);
+	scene.add(light2);
 	
 	kewbe = new Kewbe();
-	lyte = new Lyte();
+	lyte = new Lyte(20,40,20);
 }
 
 function Hexagon() {
@@ -387,18 +387,21 @@ Kewbe.prototype.render = function() {
 }
 
 
-function Lyte(){
+function Lyte(x,y,z){
 	this.planes = [];
-	this.w = 100;
-	this.h = 5;
-	this.x = 0;
-	this.y = 50;
-	this.z = 50;
+	this.w = 80;
+	this.h = 4;
+	this.x = +(x||0);
+	this.y = +(y||0);
+	this.z = +(z||0);
+	this.dx = 0;
+	this.dy = 0;
+	this.dz = 0;
 	this.number_of_planes = 6;
 	this.rotation = new THREE.Vector3(0,0,0);
 	this.ray = new THREE.Object3D();
 	for(var i=0;i<this.number_of_planes;i++){
-		this.planes.push(new THREE.Mesh(new THREE.PlaneGeometry(this.w,this.h,1,1), new THREE.MeshBasicMaterial({map:this.get_texture(),transparent:true, overdraw:true})));
+		this.planes.push(new THREE.Mesh(new THREE.PlaneGeometry(this.w,this.h,1,1), new THREE.MeshBasicMaterial({map:this.get_texture(this.w,this.h,this.number_of_planes),transparent:true, overdraw:true})));
 		this.planes[i].rotation.x = i* Math.PI*2/this.number_of_planes;
 		this.planes[i].position.x = 0;
 		this.planes[i].position.y = -0.5*this.h*Math.sin(i*Math.PI*2/this.number_of_planes);
@@ -407,18 +410,27 @@ function Lyte(){
 		this.ray.add(this.planes[i]);
 	}
 	
+	this.ballGeometry = new THREE.CubeGeometry(this.h*2,this.h*2,this.h*2);
+	this.ball = new THREE.Mesh(this.ballGeometry, new THREE.MeshLambertMaterial({color:0xFFFFFF}));
+	this.ray.add(this.ball);
 	
-	this.light = new THREE.SpotLight(0xFFFFFF);
+	this.light = new THREE.SpotLight(0xFFFF88);
 	this.light.castShadow = true;
-	scene.add(this.light);
-	this.light2 = new THREE.SpotLight(0xFFFFFFF);
+	this.light.shadowCameraNear = this.h*2;
+	this.light.shadowCameraFov = 100;
+	this.ray.add(this.light);
+		
+	this.light2 = new THREE.SpotLight(0xFFFFF88);
 	this.light2.castShadow = true;
-	scene.add(this.light2);
+	this.light2.shadowCameraNear = this.h*2;
+	this.light2.shadowCameraFov = 100;
+	this.ray.add(this.light2);
+	
 	
 	this.lightanchor = new THREE.Object3D();
 	this.lightanchor2 = new THREE.Object3D();
-	this.lightanchor.position.set(this.ray.position.x+1,this.ray.position.y,this.ray.position.z);
-	this.lightanchor2.position.set(this.ray.position.x-1,this.ray.position.y,this.ray.position.z);
+	this.lightanchor.position.set(1,1,0);
+	this.lightanchor2.position.set(-1,1,0);
 	this.ray.add(this.lightanchor);
 	this.ray.add(this.lightanchor2);
 	
@@ -427,29 +439,35 @@ function Lyte(){
 
 Lyte.prototype.update = function(){
 	
+	/*
+	this.dx = Math.sin(t/100000);
+	this.dz = Math.cos(t/100000);
+	*/
+	
+	this.x += this.dx;
+	this.y += this.dy;
+	this.z += this.dz;
+	
 	this.ray.position.set(this.x, this.y, this.z);
 	
-	this.ray.rotation.x += 0.02;
-	this.ray.rotation.z += 0.003;
-	
-	this.light.position.set(this.x,this.y,this.z);
-	this.light2.position.set(this.x,this.y,this.z);
+	this.ray.rotation.x += 0.017;
+	this.ray.rotation.z += 0.019;
+	this.ray.rotation.y += 0.023;
 	
 	this.light.target = this.lightanchor;
 	this.light2.target = this.lightanchor2;
-	
 }
 	
 
 Lyte.prototype.render = function(){
 }
 
-Lyte.prototype.get_texture = function(){
+Lyte.prototype.get_texture = function(w,h,count){
 	return Lyte.prototype._texture = Lyte.prototype._texture ||
 	(function(){
 		var canvas = document.createElement("canvas");
-		canvas.width = 20;
-		canvas.height = 10;
+		canvas.width = w;
+		canvas.height = h;
 		var ctx = canvas.getContext("2d");
 		var imgdata = ctx.getImageData(0,0,canvas.width,canvas.height);
 		var d = imgdata.data;
@@ -458,9 +476,8 @@ Lyte.prototype.get_texture = function(){
 			
 			d[ i ] = 255;
 			d[i+1] = 255;
-			d[i+2] = 255;
-			d[i+3] = 255*((canvas.height-y)/canvas.height) * (1-Math.abs(canvas.width-2*x)/canvas.width)/6;
-			
+			d[i+2] = 128;
+			d[i+3] = (255*((canvas.height-(y+1))/canvas.height) * (canvas.width-Math.abs(canvas.width-2*(1+x)))/canvas.width)/count;
 			x++;
 			if(x>=canvas.width){
 				x=0;

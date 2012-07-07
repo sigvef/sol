@@ -30,7 +30,7 @@
             }
 
             function bootstrap(){
-                renderer = new THREE.WebGLRenderer();
+                renderer = new THREE.WebGLRenderer({ maxLights: 12 });
                 resize();
                 document.body.appendChild(renderer.domElement);
                 setTimeout(start,0);
