@@ -12,8 +12,8 @@ function lerp(a, b, t) {
 }
 
 function update() {
-	camera.position.x = Math.sin(t / 200) * side * 8;
-	camera.position.z = Math.cos(t / 200) * side * 8;
+	camera.position.x = Math.sin(t / (200*2205)) * side * 8;
+	camera.position.z = Math.cos(t / (200*2205)) * side * 8;
 	light.position.x = -camera.position.x;
 	light.position.y = camera.position.y;
 	light.position.z = camera.position.z;
@@ -27,200 +27,17 @@ function update() {
 
 	camera.lookAt(ORIGO);
 
-	for ( var i = 0; i < kewbe.points.length; i++) {
-		kewbe.points[i] = kewbe.rotate({
-			axis : "y",
-			point : kewbe.points[i],
-			angle : 0.017
-		});
-		kewbe.points[i] = kewbe.rotate({
-			axis : "z",
-			point : kewbe.points[i],
-			angle : 0.01
-		});
-		kewbe.points[i] = kewbe.rotate({
-			axis : "x",
-			point : kewbe.points[i],
-			angle : 0.004
-		});
-	}
+	kewbe.update();
 }
 
-kewbe = {};
-kewbe.points = [ {
-	x : 100,
-	y : 100,
-	z : 100
-}, {
-	x : 100,
-	y : 100,
-	z : -100
-}, {
-	x : 100,
-	y : -100,
-	z : 100
-}, {
-	x : 100,
-	y : -100,
-	z : -100
-}, {
-	x : -100,
-	y : 100,
-	z : 100
-}, {
-	x : -100,
-	y : 100,
-	z : -100
-}, {
-	x : -100,
-	y : -100,
-	z : 100
-}, {
-	x : -100,
-	y : -100,
-	z : -100
-} ];
-
-kewbe.flat = [ {
-	x : 0,
-	y : 0
-}, {
-	x : 0,
-	y : 0
-}, {
-	x : 0,
-	y : 0
-}, {
-	x : 0,
-	y : 0
-}, {
-	x : 0,
-	y : 0
-}, {
-	x : 0,
-	y : 0
-}, {
-	x : 0,
-	y : 0
-}, {
-	x : 0,
-	y : 0
-}, ];
-
-kewbe.camera = {
-	x : 0,
-	y : 0,
-	z : 250,
-	pitch : 0,
-	yaw : 0,
-	roll : 0
-};
-kewbe.viewer = {
-	x : 0,
-	y : 0,
-	z : -300
-};
-kewbe.rotate = function(args) {
-	var ans = {
-		x : 0,
-		y : 0,
-		z : 0
-	};
-	if (args.axis == "x") {
-		ans.x = args.point.x;
-		ans.y = Math.cos(args.angle) * args.point.y - Math.sin(args.angle)
-				* args.point.z;
-		ans.z = Math.sin(args.angle) * args.point.y + Math.cos(args.angle)
-				* args.point.z;
-	} else if (args.axis == "y") {
-		ans.x = Math.cos(args.angle) * args.point.x + Math.sin(args.angle)
-				* args.point.z;
-		ans.y = args.point.y;
-		ans.z = -Math.sin(args.angle) * args.point.x + Math.cos(args.angle)
-				* args.point.z;
-	} else if (args.axis == "z") {
-		ans.x = Math.cos(args.angle) * args.point.x - Math.sin(args.angle)
-				* args.point.y;
-		ans.y = Math.sin(args.angle) * args.point.x + Math.cos(args.angle)
-				* args.point.y;
-		ans.z = args.point.z;
-	}
-	return ans;
-}
-
-kewbe.scaler = 256;
 
 function render() {
-	if (t > 3500) {
-		camera.position.y = Math.sin((t-3500)/100)*1000;
-		camera.position.x = Math.sin((t-3500)/100)*200;
-		camera.position.z = Math.cos((t-3500)/100)*200;
+	if (t > 3500*2205) {
+		camera.position.y = Math.sin((t - 3500*2205) / (300*2205)) * 500;
+		camera.position.x = Math.sin((t - 3500*2205) / (100*2205)) * 200;
+		camera.position.z = Math.cos((t - 3500*2205) / (100*2205)) * 200;
 		camera.lookAt(ORIGO);
-		for ( var i = 0; i < kewbe.points.length; i++) {
-
-			var d = {
-				x : Math.cos(kewbe.camera.pitch)
-						* (Math.sin(kewbe.camera.roll)
-								* (kewbe.points[i].y - kewbe.camera.y) + Math
-								.cos(kewbe.camera.roll)
-								* (kewbe.points[i].x - kewbe.camera.x))
-						- Math.sin(kewbe.camera.pitch)
-						* (kewbe.points[i].z - kewbe.camera.z),
-				y : Math.sin(kewbe.camera.yaw)
-				
-						* (Math.cos(kewbe.camera.pitch)
-								* (kewbe.points[i].z - kewbe.camera.z) + Math
-								.sin(kewbe.camera.pitch)
-								* (Math.sin(kewbe.camera.roll)
-										* (kewbe.points[i].y - kewbe.camera.y) + Math
-										.cos(kewbe.camera.roll)
-										* (kewbe.points[i].x - kewbe.camera.x)))
-						+ Math.cos(kewbe.camera.x)
-						* (Math.cos(kewbe.camera.roll)
-								* (kewbe.points[i].y - kewbe.camera.y) - Math
-								.sin(kewbe.camera.roll)
-								* (kewbe.points[i].x - kewbe.camera.x)),
-				z : Math.cos(kewbe.camera.yaw)
-						* (Math.cos(kewbe.camera.pitch)
-								* (kewbe.points[i].z - kewbe.camera.z) + Math
-								.sin(kewbe.camera.pitch)
-								* (Math.sin(kewbe.camera.roll)
-										* (kewbe.points[i].y - kewbe.camera.y) + Math
-										.cos(kewbe.camera.roll)
-										* (kewbe.points[i].x - kewbe.camera.x)))
-						- Math.sin(kewbe.camera.x)
-						* (Math.cos(kewbe.camera.roll)
-								* (kewbe.points[i].y - kewbe.camera.y) - Math
-								.sin(kewbe.camera.roll)
-								* (kewbe.points[i].x - kewbe.camera.x))
-			};
-
-			kewbe.flat[i].x = (d.x - kewbe.viewer.x) * (kewbe.viewer.z / d.z);
-			kewbe.flat[i].y = (d.y - kewbe.viewer.y) * (kewbe.viewer.z / d.z);
-
-			var x = (0 | (side * (kewbe.scaler + kewbe.flat[i].x) / (2 * kewbe.scaler)));
-			var y = (0 | (side * (kewbe.scaler + kewbe.flat[i].y) / (2 * kewbe.scaler)));
-			// cubes[side*(0|(side*(kewbe.scaler/2+kewbe.flat[i].x)/kewbe.scaler))+
-			// (0|(side*kewbe.scaler/2+kewbe.flat[i].y)/kewbe.scaler)].punch(1,1,1);
-			var intensity = (kewbe.points[i].z + kewbe.scaler)
-					/ (2 * kewbe.scaler);
-			kewbe.flat[i].hexx = x;
-			kewbe.flat[i].hexy = y;
-			kewbe.flat[i].intensity = intensity;
-		}
-		vtv(kewbe.flat[0], kewbe.flat[1]);
-		vtv(kewbe.flat[0], kewbe.flat[2]);
-		vtv(kewbe.flat[0], kewbe.flat[4]);
-		vtv(kewbe.flat[1], kewbe.flat[5]);
-		vtv(kewbe.flat[1], kewbe.flat[3]);
-		vtv(kewbe.flat[2], kewbe.flat[3]);
-		vtv(kewbe.flat[2], kewbe.flat[6]);
-		vtv(kewbe.flat[3], kewbe.flat[7]);
-		vtv(kewbe.flat[4], kewbe.flat[5]);
-		vtv(kewbe.flat[4], kewbe.flat[6]);
-		vtv(kewbe.flat[5], kewbe.flat[7]);
-		vtv(kewbe.flat[6], kewbe.flat[7]);
-		// vtv(kewbe.flat[0].index, kewbe.flat[1].index);
+		kewbe.render();
 	}
 	renderer.render(scene, camera);
 }
@@ -321,6 +138,7 @@ function init() {
 	light2.intensity = 0.5;
 	light2.castShadow = true;
 	scene.add(light2);
+	kewbe = new Kewbe();
 }
 
 function Hexagon() {
@@ -405,4 +223,159 @@ function createHexagonGeometry(hy, ly) {
 
 	geometry.computeFaceNormals(false);
 	return geometry;
+}
+
+function Kewbe() {
+
+	this.scaler = 256;
+	this.points = [ {
+		x : 100,
+		y : 100,
+		z : 100
+	}, {
+		x : 100,
+		y : 100,
+		z : -100
+	}, {
+		x : 100,
+		y : -100,
+		z : 100
+	}, {
+		x : 100,
+		y : -100,
+		z : -100
+	}, {
+		x : -100,
+		y : 100,
+		z : 100
+	}, {
+		x : -100,
+		y : 100,
+		z : -100
+	}, {
+		x : -100,
+		y : -100,
+		z : 100
+	}, {
+		x : -100,
+		y : -100,
+		z : -100
+	} ];
+	this.flat = [ {
+		x : 0,
+		y : 0
+	}, {
+		x : 0,
+		y : 0
+	}, {
+		x : 0,
+		y : 0
+	}, {
+		x : 0,
+		y : 0
+	}, {
+		x : 0,
+		y : 0
+	}, {
+		x : 0,
+		y : 0
+	}, {
+		x : 0,
+		y : 0
+	}, {
+		x : 0,
+		y : 0
+	}, ];
+
+	this.camera = {
+		x : 0,
+		y : 0,
+		z : 250,
+	};
+	this.viewer = {
+		x : 0,
+		y : 0,
+		z : -300
+	};
+}
+
+Kewbe.prototype.update = function() {
+	for ( var i = 0; i < this.points.length; i++) {
+		this.points[i] = this.rotate({
+			axis : "y",
+			point : this.points[i],
+			angle : 0.017
+		});
+		this.points[i] = this.rotate({
+			axis : "z",
+			point : this.points[i],
+			angle : 0.01
+		});
+		this.points[i] = this.rotate({
+			axis : "x",
+			point : this.points[i],
+			angle : 0.004
+		});
+	}
+}
+
+Kewbe.prototype.rotate = function(args) {
+	var ans = {
+		x : 0,
+		y : 0,
+		z : 0
+	};
+	if (args.axis == "x") {
+		ans.x = args.point.x;
+		ans.y = Math.cos(args.angle) * args.point.y - Math.sin(args.angle)
+				* args.point.z;
+		ans.z = Math.sin(args.angle) * args.point.y + Math.cos(args.angle)
+				* args.point.z;
+	} else if (args.axis == "y") {
+		ans.x = Math.cos(args.angle) * args.point.x + Math.sin(args.angle)
+				* args.point.z;
+		ans.y = args.point.y;
+		ans.z = -Math.sin(args.angle) * args.point.x + Math.cos(args.angle)
+				* args.point.z;
+	} else if (args.axis == "z") {
+		ans.x = Math.cos(args.angle) * args.point.x - Math.sin(args.angle)
+				* args.point.y;
+		ans.y = Math.sin(args.angle) * args.point.x + Math.cos(args.angle)
+				* args.point.y;
+		ans.z = args.point.z;
+	}
+	return ans;
+}
+
+Kewbe.prototype.render = function() {
+	for ( var i = 0; i < this.points.length; i++) {
+
+		var d = {
+			x : this.points[i].x - this.camera.x,
+			y : Math.cos(this.camera.x) * (this.points[i].y - this.camera.y),
+			z : this.points[i].z - this.camera.z - Math.sin(this.camera.x)
+					* (this.points[i].y - this.camera.y)
+		};
+
+		this.flat[i].x = (d.x - this.viewer.x) * (this.viewer.z / d.z);
+		this.flat[i].y = (d.y - this.viewer.y) * (this.viewer.z / d.z);
+
+		this.flat[i].hexx = (0 | (side * (this.scaler + this.flat[i].x) / (2 * this.scaler)));
+		this.flat[i].hexy = (0 | (side * (this.scaler + this.flat[i].y) / (2 * this.scaler)));
+		this.flat[i].intensity = (this.points[i].z + this.scaler)
+				/ (2 * this.scaler);
+	}
+
+	vtv(this.flat[0], this.flat[1]);
+	vtv(this.flat[0], this.flat[2]);
+	vtv(this.flat[0], this.flat[4]);
+	vtv(this.flat[1], this.flat[5]);
+	vtv(this.flat[1], this.flat[3]);
+	vtv(this.flat[2], this.flat[3]);
+	vtv(this.flat[2], this.flat[6]);
+	vtv(this.flat[3], this.flat[7]);
+	vtv(this.flat[4], this.flat[5]);
+	vtv(this.flat[4], this.flat[6]);
+	vtv(this.flat[5], this.flat[7]);
+	vtv(this.flat[6], this.flat[7]);
 }

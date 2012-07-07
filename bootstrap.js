@@ -10,24 +10,22 @@
             })();
 
             function loop(){
-                dt += (time-old_time);
-                old_time = time;
-                time = new Date();
-                dt = dt%1000;
-                while(dt>20){
+                dt += (t-old_time);
+                old_time = t;
+                while(dt> 882){
                     update();
-                    t++;
-                    dt-=20;
+                    dt-= 882;
+                    console.log(dt);
                 }
+                console.log("render");
                 render();
                 requestAnimFrame(loop);
             }
 
 
             function start(){
-                time = new Date();
+                time = 0;
                 old_time = time;
-                t = 0;
                 dt = 0;
                 init();
                 requestAnimFrame(loop);
