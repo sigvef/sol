@@ -14,16 +14,6 @@ function lerp(a, b, t) {
 analyserData = new Uint8Array(256);
 function update() {
 	
-	/*
-	mixer.analyser.getByteFrequencyData(analyserData);
-	analyserAverage = 0;
-	for(var i=0;i<analyserData.length;i++){
-		analyserAverage += analyserData[i];
-	}
-	analyserAverage /= analyserData.length;
-	analyserAverage /= 256;
-	*/
-	
 	camera.position.x = Math.sin(t / (200*2205)) * side * 8;
 	camera.position.z = Math.cos(t / (200*2205)) * side * 8;
 	light.position.x = -camera.position.x;
@@ -111,6 +101,7 @@ function init() {
 	midi.add_callback(function(e) {
 		mixer.handle_event(e);
 	});
+	/*
 	midi.add_callback(function(e) {
 		if (e.type == 0x9) {
 			cubes[e.note_number + e.midi_channel * 50].hold(
@@ -120,6 +111,7 @@ function init() {
 			cubes[e.note_number + e.midi_channel * 50].release();
 		}
 	});
+	*/
 	camera = new THREE.PerspectiveCamera(45, 16 / 9, 0.1, 10000);
 	camera.position.y = 100;
 
@@ -127,40 +119,74 @@ function init() {
 	scene = new THREE.Scene();
 	scene.add(camera);
 	cubes = [];
-	side = 16;
-	x_spacing = 5 + 2.545;
-	z_spacing = 4.363 * 2;
+	side = 12;
+	x_spacing = 5 + 2.545+0.5;
+	z_spacing = 4.363 * 2 + 0.5;
 	geometry = createHexagonGeometry(10, -10);
 	for ( var i = 0; i < side; i++) {
 		for ( var j = 0; j < side; j++) {
-			cubes[i * side + j] = new Hexagon();
-			var material = new THREE.MeshLambertMaterial({
-				color : 0xFFFFFF
-			});
-			cubes[i * side + j].mesh = new THREE.Mesh(geometry, material);
-			cubes[i * side + j].mesh.position.x = (i - side / 2) * x_spacing;
-			cubes[i * side + j].mesh.position.z = (i % 2) * z_spacing / 2
-					+ (j - side / 2) * z_spacing;
-			cubes[i * side + j].mesh.castShadow = true;
-			cubes[i * side + j].mesh.receiveShadow = true;
+			cubes[i * side + j] = new Hexagon((i - side / 2) * x_spacing, 0,
+					(i % 2) * z_spacing / 2 + (j - side / 2) * z_spacing);
 			scene.add(cubes[i * side + j].mesh);
 		}
 	}
 	light = new THREE.SpotLight(0xF98988);
 	light.castShadow = true;
 	light.intensity = 0.5;
-	//scene.add(light);
+	// scene.add(light);
 	light2 = new THREE.SpotLight(0xF88808);
 	light2.intensity = 1;
-	light2.castShadow = true;
+	//light2.castShadow = true;
 	scene.add(light2);
 	
 	kewbe = new Kewbe();
-	lyte = new Lyte(20,60,20);
+	lyte = new Lyte(0,60,0);
 }
 
-function Hexagon() {
+function Hexagon(x,y,z) {
 	this.held = false;
+	var material = new THREE.MeshLambertMaterial({
+		color : 0xFFFFFF
+	});
+	this.mesh = new THREE.Mesh(geometry, material);
+	this.mesh.position.x = x;
+	this.mesh.position.y = y;
+	this.mesh.position.z = z;
+	this.mesh.castShadow = true;
+	this.mesh.receiveShadow = true;
+	this.goalColor = {r:1,g:1,b:1};
+	this.startColor = {r:1,g:1,b:1};
+	this.startColorTime = 0;
+	this.goalColorTime = 0;
+	this.goalPosition = {x:x,y:y,z:z};
+	this.startPosition = {x:1,y:1,z:1};
+	this.startPositionTime = 0;
+	this.goalPositionTime = 0;
+	this.goalRotation = {x:0,y:0,z:0};
+	this.startRotation = {x:0,y:0,z:0};
+	this.startRotationTime = 0;
+	this.goalRotationTime = 0;
+}
+
+Hexagon.prototype.setGoalColor = function(goalColor, goalTime){
+	this.startColor = this.mesh.material.color;
+	this.goalColor = goalColor;
+	this.startColorTime = t;
+	this.goalColorTime = goalTime;
+}
+
+Hexagon.prototype.setGoalPosition = function(goalPosition, goalTime){
+	this.startPosition = this.mesh.position;
+	this.goalPosition = goalPosition;
+	this.startPositionTime = t;
+	this.goalPositionTime = goalTime;
+}
+
+Hexagon.prototype.setGoalRotation = function(goalRotation, goalTime){
+	this.startRotation = this.mesh.rotation;
+	this.goalRotation = goalRotation;
+	this.startRotationTime = t;
+	this.goalRotationTime = goalTime;
 }
 
 Hexagon.prototype.punch = function(r, g, b) {
@@ -183,30 +209,51 @@ Hexagon.prototype.release = function() {
 }
 
 Hexagon.prototype.update = function() {
-	var threshold = 0.2;
-	if (!this.held) {
-		if (this.mesh.material.color.r > threshold) {
-			this.mesh.material.color.r *= 0.9;
-		}
-		if (this.mesh.material.color.r < threshold) {
-			this.mesh.material.color.r = threshold;
-		}
-		if (this.mesh.material.color.g > threshold) {
-			this.mesh.material.color.g *= 0.9;
-		}
-		if (this.mesh.material.color.g < threshold) {
-			this.mesh.material.color.g = threshold;
-		}
-		if (this.mesh.material.color.b > threshold) {
-			this.mesh.material.color.b *= 0.9;
-		}
-		if (this.mesh.material.color.b < threshold) {
-			this.mesh.material.color.b = threshold;
+	
+	/* interpolate color */
+	if(this.goalColor.r != this.mesh.material.color.r ||
+	   this.goalColor.g != this.mesh.material.color.g ||
+	   this.goalColor.b != this.mesh.material.color.b){
+		if(t > this.goalColorTime){
+			this.mesh.material.color.r = this.goalColor.r;
+			this.mesh.material.color.g = this.goalColor.g;
+			this.mesh.material.color.b = this.goalColor.b;
+		}else {
+			this.mesh.material.color.r = smoothstep(this.goalColor.r, this.startColor.r, (this.goalColorTime-t)/(this.goalColorTime-this.startColorTime));
+			this.mesh.material.color.g = smoothstep(this.goalColor.g, this.startColor.g, (this.goalColorTime-t)/(this.goalColorTime-this.startColorTime));
+			this.mesh.material.color.b = smoothstep(this.goalColor.b, this.startColor.b, (this.goalColorTime-t)/(this.goalColorTime-this.startColorTime));
 		}
 	}
-
-	this.mesh.position.y = (this.mesh.material.color.r
-			+ this.mesh.material.color.g + this.mesh.material.color.b) * 5;
+	
+	/* interpolate position */
+	if(this.goalPosition.x != this.mesh.position.x ||
+	   this.goalPosition.y != this.mesh.position.y ||
+	   this.goalPosition.z != this.mesh.position.z){
+		if(t >= this.goalPositionTime){
+			this.mesh.position.x = this.goalPosition.x;
+			this.mesh.position.y = this.goalPosition.y;
+			this.mesh.position.z = this.goalPosition.z;
+		}else {
+			this.mesh.position.x = smoothstep(this.goalPosition.x, this.startPosition.x, (this.goalPositionTime-t)/(this.goalPositionTime-this.startPositionTime));
+			this.mesh.position.y = smoothstep(this.goalPosition.y, this.startPosition.y, (this.goalPositionTime-t)/(this.goalPositionTime-this.startPositionTime));
+			this.mesh.position.z = smoothstep(this.goalPosition.z, this.startPosition.z, (this.goalPositionTime-t)/(this.goalPositionTime-this.startPositionTime));
+		}
+	}
+	
+	/* interpolate rotation */
+	if(this.goalRotation.x != this.mesh.rotation.x ||
+	   this.goalRotation.y != this.mesh.rotation.y ||
+	   this.goalRotation.z != this.mesh.rotation.z){
+		if(t > this.goalRotationTime){
+			this.mesh.rotation.x = this.goalRotation.x;
+			this.mesh.rotation.y = this.goalRotation.y;
+			this.mesh.rotation.z = this.goalRotation.z;
+		}else {
+			this.mesh.rotation.x = smoothstep(this.goalRotation.x, this.startRotation.x, (this.goalRotationTime-t)/(this.goalRotationTime-this.startRotationTime));
+			this.mesh.rotation.y = smoothstep(this.goalRotation.y, this.startRotation.y, (this.goalRotationTime-t)/(this.goalRotationTime-this.startRotationTime));
+			this.mesh.rotation.z = smoothstep(this.goalRotation.z, this.startRotation.z, (this.goalRotationTime-t)/(this.goalRotationTime-this.startRotationTime));
+		}
+	}
 }
 
 function createHexagonGeometry(hy, ly) {
@@ -403,7 +450,7 @@ Kewbe.prototype.render = function() {
 
 function Lyte(x,y,z){
 	this.planes = [];
-	this.w = 80;
+	this.w = 40;
 	this.h = 4;
 	this.x = +(x||0);
 	this.y = +(y||0);
@@ -465,17 +512,20 @@ function Lyte(x,y,z){
 }
 
 Lyte.prototype.setIntensity = function(intensity){
-	intensity*=2;
 	for(var i=0;i<this.number_of_rays;i++){
 		this.rays[i].light.intensity = intensity;
 		this.rays[i].light2.intensity = intensity;
-		//this.ball.material.color.setRGB(intensity,intensity,intensity);
+		this.ball.material.color.r = intensity;
+		this.ball.material.color.g = intensity;
+		this.ball.material.color.b = intensity;
 	}
 }
 
 Lyte.prototype.update = function(){
 	
-	//this.setIntensity(analyserAverage);
+	var samples_per_hemiquaver = midi.ticks_per_beat/midi.ticks_per_second * 44100 * 0.5;
+	
+	this.setIntensity(1-(t%samples_per_hemiquaver)/samples_per_hemiquaver);
 	
 	this.x += this.dx;
 	this.y += this.dy;
@@ -511,7 +561,7 @@ Lyte.prototype.get_texture = function(w,h,count){
 			
 			d[ i ] = 255;
 			d[i+1] = 255;
-			d[i+2] = 128;
+			d[i+2] = 192;
 			d[i+3] = (255*((canvas.height-(y+1))/canvas.height) * (canvas.width-Math.abs(canvas.width-2*(1+x)))/canvas.width)/count;
 			x++;
 			if(x>=canvas.width){
