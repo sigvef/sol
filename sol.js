@@ -389,23 +389,24 @@ Kewbe.prototype.render = function() {
 
 function Lyte(){
 	this.planes = [];
-	this.w = 20;
-	this.h = 10;
-	this.x = 50;
-	this.y = 40;
-	this.z = 0;
+	this.w = 100;
+	this.h = 5;
+	this.x = 0;
+	this.y = 50;
+	this.z = 50;
+	this.number_of_planes = 6;
 	this.rotation = new THREE.Vector3(0,0,0);
-	//var rayGeometry = new THREE.Geometry();
 	this.ray = new THREE.Object3D();
-	for(var i=0;i<6;i++){
+	for(var i=0;i<this.number_of_planes;i++){
 		this.planes.push(new THREE.Mesh(new THREE.PlaneGeometry(this.w,this.h,1,1), new THREE.MeshBasicMaterial({map:this.get_texture(),transparent:true, overdraw:true})));
-		this.planes[i].rotation.x = i* Math.PI*2/6;
-		this.planes[i].doubleSided = false;
-		//THREE.GeometryUtils.merge(rayGeometry, this.planes[i]);
+		this.planes[i].rotation.x = i* Math.PI*2/this.number_of_planes;
+		this.planes[i].position.x = 0;
+		this.planes[i].position.y = -0.5*this.h*Math.sin(i*Math.PI*2/this.number_of_planes);
+		this.planes[i].position.z =  0.5*this.h*Math.cos(i*Math.PI*2/this.number_of_planes);
+		this.planes[i].doubleSided = true;
 		this.ray.add(this.planes[i]);
 	}
 	
-	//this.ray = new THREE.Mesh(rayGeometry, new THREE.MeshBasicMaterial({map:this.get_texture(), transparent:true, overdraw:true,blending:THREE.AdditiveBlending}));
 	
 	this.light = new THREE.SpotLight(0xFFFFFF);
 	this.light.castShadow = true;
