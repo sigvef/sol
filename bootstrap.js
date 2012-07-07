@@ -15,9 +15,7 @@
                 while(dt> 882){
                     update();
                     dt-= 882;
-                    console.log(dt);
                 }
-                console.log("render");
                 render();
                 requestAnimFrame(loop);
             }

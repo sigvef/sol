@@ -28,6 +28,7 @@ function update() {
 	camera.lookAt(ORIGO);
 
 	kewbe.update();
+	lyte.update();
 }
 
 
@@ -39,6 +40,7 @@ function render() {
 		camera.lookAt(ORIGO);
 		kewbe.render();
 	}
+	lyte.render();
 	renderer.render(scene, camera);
 }
 
@@ -135,10 +137,12 @@ function init() {
 	light.intensity = 0.5;
 	scene.add(light);
 	light2 = new THREE.SpotLight(0x88FF88);
-	light2.intensity = 0.5;
+	light2.intensity = 1;
 	light2.castShadow = true;
-	scene.add(light2);
+	//scene.add(light2);
+	
 	kewbe = new Kewbe();
+	lyte = new Lyte();
 }
 
 function Hexagon() {
@@ -347,6 +351,8 @@ Kewbe.prototype.rotate = function(args) {
 	return ans;
 }
 
+
+
 Kewbe.prototype.render = function() {
 	for ( var i = 0; i < this.points.length; i++) {
 
@@ -378,4 +384,91 @@ Kewbe.prototype.render = function() {
 	vtv(this.flat[4], this.flat[6]);
 	vtv(this.flat[5], this.flat[7]);
 	vtv(this.flat[6], this.flat[7]);
+}
+
+
+function Lyte(){
+	this.planes = [];
+	this.w = 20;
+	this.h = 10;
+	this.x = 50;
+	this.y = 40;
+	this.z = 0;
+	this.rotation = new THREE.Vector3(0,0,0);
+	//var rayGeometry = new THREE.Geometry();
+	this.ray = new THREE.Object3D();
+	for(var i=0;i<6;i++){
+		this.planes.push(new THREE.Mesh(new THREE.PlaneGeometry(this.w,this.h,1,1), new THREE.MeshBasicMaterial({map:this.get_texture(),transparent:true, overdraw:true})));
+		this.planes[i].rotation.x = i* Math.PI*2/6;
+		this.planes[i].doubleSided = false;
+		//THREE.GeometryUtils.merge(rayGeometry, this.planes[i]);
+		this.ray.add(this.planes[i]);
+	}
+	
+	//this.ray = new THREE.Mesh(rayGeometry, new THREE.MeshBasicMaterial({map:this.get_texture(), transparent:true, overdraw:true,blending:THREE.AdditiveBlending}));
+	
+	this.light = new THREE.SpotLight(0xFFFFFF);
+	this.light.castShadow = true;
+	scene.add(this.light);
+	this.light2 = new THREE.SpotLight(0xFFFFFFF);
+	this.light2.castShadow = true;
+	scene.add(this.light2);
+	
+	this.lightanchor = new THREE.Object3D();
+	this.lightanchor2 = new THREE.Object3D();
+	this.lightanchor.position.set(this.ray.position.x+1,this.ray.position.y,this.ray.position.z);
+	this.lightanchor2.position.set(this.ray.position.x-1,this.ray.position.y,this.ray.position.z);
+	this.ray.add(this.lightanchor);
+	this.ray.add(this.lightanchor2);
+	
+	scene.add(this.ray);
+}
+
+Lyte.prototype.update = function(){
+	
+	this.ray.position.set(this.x, this.y, this.z);
+	
+	this.ray.rotation.x += 0.02;
+	this.ray.rotation.z += 0.003;
+	
+	this.light.position.set(this.x,this.y,this.z);
+	this.light2.position.set(this.x,this.y,this.z);
+	
+	this.light.target = this.lightanchor;
+	this.light2.target = this.lightanchor2;
+	
+}
+	
+
+Lyte.prototype.render = function(){
+}
+
+Lyte.prototype.get_texture = function(){
+	return Lyte.prototype._texture = Lyte.prototype._texture ||
+	(function(){
+		var canvas = document.createElement("canvas");
+		canvas.width = 20;
+		canvas.height = 10;
+		var ctx = canvas.getContext("2d");
+		var imgdata = ctx.getImageData(0,0,canvas.width,canvas.height);
+		var d = imgdata.data;
+		var x=0,y=0;
+		for(var i=0;i<d.length;i+=4){
+			
+			d[ i ] = 255;
+			d[i+1] = 255;
+			d[i+2] = 255;
+			d[i+3] = 255*((canvas.height-y)/canvas.height) * (1-Math.abs(canvas.width-2*x)/canvas.width)/6;
+			
+			x++;
+			if(x>=canvas.width){
+				x=0;
+				y++;
+			}
+		}
+		ctx.putImageData(imgdata,0,0);
+		var texture = new THREE.Texture(canvas);
+		texture.needsUpdate = true;
+		return texture;
+	})();
 }
