@@ -47,6 +47,7 @@ function Mixer(){
 
 
     this.analyser = this.ax.createAnalyser();
+    this.analyser.fftSize = 1024;
     this.convolver = this.ax.createConvolver();
     this.gainNode = this.ax.createGainNode();
     var buffer = this.ax.createBuffer(2,44110*3,44110);
