@@ -1,4 +1,4 @@
-tSamples = 0;
+t = 0;
 play_forward_trigger = 0;
 function Mixer(){
     this.ax = new webkitAudioContext();
@@ -21,11 +21,11 @@ function Mixer(){
             }
             datal[i] = 0;
             for(var j=0;j<this.instruments.length;j++){
-        		datal[i] += this.instruments[j].generate(tSamples);
+        		datal[i] += this.instruments[j].generate(t);
                 //datal[i] += Math.random()*0.01;
             }
             datar[i] = datal[i];
-            tSamples++;
+            t++;
         }
 
     };
@@ -90,7 +90,7 @@ function Instrument(channel){
     	if (this.num_active_notes!=this.MAXPOLY) {
 	        this.note_pool[this.num_active_notes].note_number = note_number;
 	        this.note_pool[this.num_active_notes].velocity = velocity;
-	        this.note_pool[this.num_active_notes].tStarted = tSamples;
+	        this.note_pool[this.num_active_notes].tStarted = t;
 	        this.note_pool[this.num_active_notes].tEnded = -1;	//-1 means it has not ended yet
 	        this.note_pool[this.num_active_notes].amplitude = 0;
 	        this.num_active_notes++;
@@ -103,7 +103,7 @@ function Instrument(channel){
     this.note_off = function(note_number){
         for(var i=0;i<this.num_active_notes;i++){
             if(note_number == this.note_pool[i].note_number){
-            	this.note_pool[i].tEnded = tSamples;
+            	this.note_pool[i].tEnded = t;
             	//break;
                 //this._note_off(i);
                 //i--;
@@ -126,14 +126,14 @@ function Instrument(channel){
     
     this.envelope = function(i){
 		if (this.note_pool[i].tEnded != -1){
-			var tSinceEnd = tSamples-this.note_pool[i].tEnded;
+			var tSinceEnd = t-this.note_pool[i].tEnded;
 			if (tSinceEnd > this.adsr.r) {	//note really ended (after release)
 				this._note_off(i);
 				return false;
 			}
 			return Math.max(this.adsr.s*(1-tSinceEnd/this.adsr.r),0); //release phase
 		}
-		var tSinceStart = tSamples-this.note_pool[i].tStarted;
+		var tSinceStart = t-this.note_pool[i].tStarted;
 		if (tSinceStart > this.adsr.a) return Math.max(1-(tSinceStart-this.adsr.a)/this.adsr.d, this.adsr.s);  //decay/sustain phase
 		return tSinceStart/this.adsr.a; //attack phase
     };
