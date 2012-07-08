@@ -43,6 +43,7 @@ function update() {
 
 	kewbe.update();
 	lyte.update();
+	//lyte2.update();
 }
 
 
@@ -54,7 +55,6 @@ function render() {
 		camera.lookAt(ORIGO);
 		kewbe.render();
 	}
-	lyte.render();
 	renderer.render(scene, camera);
 }
 
@@ -164,12 +164,13 @@ FRAME_LENGTH*5
 	light.intensity = 0.5;
 	// scene.add(light);
 	light2 = new THREE.SpotLight(0xF88808);
-	light2.intensity = 1;
+	light2.intensity = 0.1;
 	//light2.castShadow = true;
 	scene.add(light2);
 	
 	kewbe = new Kewbe();
-	lyte = new Lyte(0,60,0);
+	lyte = new Lyte(0,40,0);
+	//lyte2 = new Lyte(0,60,0);
 }
 
 function Hexagon(x,y,z) {
@@ -541,7 +542,7 @@ function Lyte(x,y,z){
 	this.rays[2].rotation.x = 0;
 	this.rays[2].rotation.z = Math.PI/2;
 	
-	this.ballGeometry = new THREE.SphereGeometry(this.h*1.2,32,16);
+	this.ballGeometry = new THREE.SphereGeometry(this.h*1.18,32,16);
 	this.ball = new THREE.Mesh(this.ballGeometry, new THREE.MeshBasicMaterial({color:0xFFFFFF}));
 	this.lyte.add(this.ball);
 	this.lyte.add(new THREE.Mesh(new THREE.CubeGeometry(this.h*2,this.h*2,this.h*2), new THREE.MeshLambertMaterial({color:0xFFFFFF})));
@@ -553,10 +554,15 @@ Lyte.prototype.setIntensity = function(intensity){
 	for(var i=0;i<this.number_of_rays;i++){
 		this.rays[i].light.intensity = intensity;
 		this.rays[i].light2.intensity = intensity;
-		this.ball.material.color.r = intensity;
-		this.ball.material.color.g = intensity;
-		this.ball.material.color.b = intensity;
+		for(var j=0;j<this.number_of_planes;j++){
+			this.rays[i].planes[j].material.color.r = intensity;
+			this.rays[i].planes[j].material.color.g = intensity;
+			this.rays[i].planes[j].material.color.b = intensity;
+		}
 	}
+	this.ball.material.color.r = intensity;
+	this.ball.material.color.g = intensity;
+	this.ball.material.color.b = intensity;
 }
 
 Lyte.prototype.update = function(){

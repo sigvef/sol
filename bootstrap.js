@@ -31,7 +31,7 @@ window.requestAnimFrame = (function(){
             }
 
             function bootstrap(){
-                renderer = new THREE.WebGLRenderer({ maxLights: 32 });
+                renderer = new THREE.WebGLRenderer({ maxLights: 10 });
                 resize();
                 document.body.appendChild(renderer.domElement);
                 setTimeout(start,0);
