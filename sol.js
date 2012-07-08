@@ -600,9 +600,9 @@ Lyte.prototype.update = function(){
 	
 	this.lyte.position.set(this.x, this.y, this.z);
 	
-	this.lyte.rotation.x += 0.017;
-	this.lyte.rotation.z += 0.019;
-	this.lyte.rotation.y += 0.023;
+	this.lyte.rotation.x += 0.017*2;
+	this.lyte.rotation.z += 0.019*2;
+	this.lyte.rotation.y += 0.023*2;
 	
 	for(var i=0;i<this.number_of_rays;i++){
 		this.rays[i].light.target = this.rays[i].lightanchor;
