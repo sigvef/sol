@@ -164,7 +164,7 @@ FRAME_LENGTH*5
 	light.intensity = 0.5;
 	// scene.add(light);
 	light2 = new THREE.SpotLight(0xF88808);
-	light2.intensity = 0.1;
+	light2.intensity = 0.5;
 	//light2.castShadow = true;
 	scene.add(light2);
 	
@@ -542,10 +542,32 @@ function Lyte(x,y,z){
 	this.rays[2].rotation.x = 0;
 	this.rays[2].rotation.z = Math.PI/2;
 	
-	this.ballGeometry = new THREE.SphereGeometry(this.h*1.18,32,16);
+	
+	this.ballGeometry = new THREE.SphereGeometry(this.h/2,32,16);
 	this.ball = new THREE.Mesh(this.ballGeometry, new THREE.MeshBasicMaterial({color:0xFFFFFF}));
 	this.lyte.add(this.ball);
-	this.lyte.add(new THREE.Mesh(new THREE.CubeGeometry(this.h*2,this.h*2,this.h*2), new THREE.MeshLambertMaterial({color:0xFFFFFF})));
+	
+	var cube_geometry = new THREE.CubeGeometry(this.h*2,this.h*2,this.h*2);
+	var cube_mesh = new THREE.Mesh(cube_geometry);
+	var cube_bsp = new ThreeBSP(cube_mesh);
+	
+	var sphere_geometry = new THREE.SphereGeometry(this.h*1.15,32,32);
+	var sphere_mesh = new THREE.Mesh(sphere_geometry);
+	var sphere_bsp = new ThreeBSP(sphere_mesh);
+	
+	var ring_inner_g = new THREE.SphereGeometry(this.h*1.3,32,32);
+	var ring_inner_m = new THREE.Mesh(ring_inner_g);
+	var ring_outer_g = new THREE.SphereGeometry(this.h*2.2,32,32);
+	var ring_outer_m = new THREE.Mesh(ring_outer_g);
+	var ring_bsp = new ThreeBSP(ring_outer_m).subtract(new ThreeBSP(ring_inner_m));
+	
+	var subtract_bsp = cube_bsp.subtract(sphere_bsp);
+	
+	var lyte_shell = subtract_bsp.subtract(ring_bsp);
+	
+	//this.lyte.add(ring_bsp.toMesh(new THREE.MeshNormalMaterial()));
+	this.lyte.add(lyte_shell.toMesh(new THREE.MeshLambertMaterial()));
+	//this.lyte.add(new THREE.Mesh(new THREE.CubeGeometry(this.h*2,this.h*2,this.h*2), new THREE.MeshLambertMaterial({color:0xFFFFFF})));
 	
 	scene.add(this.lyte);
 }
@@ -568,8 +590,9 @@ Lyte.prototype.setIntensity = function(intensity){
 Lyte.prototype.update = function(){
 	
 	var samples_per_hemiquaver = midi.ticks_per_beat/midi.ticks_per_second * 44100 * 0.5;
+	var samples_per_quaver = samples_per_hemiquaver*2;
 	
-	this.setIntensity(1-(t%samples_per_hemiquaver)/samples_per_hemiquaver);
+	this.setIntensity(1-(t%samples_per_quaver)/samples_per_quaver);
 	
 	this.x += this.dx;
 	this.y += this.dy;
