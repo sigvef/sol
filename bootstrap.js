@@ -26,10 +26,8 @@ window.requestAnimFrame = (function(){
                 time = 0;
                 old_time = time;
                 dt = 0;
-                lytetex = THREE.ImageUtils.loadTexture("metal20.png",{},function(){
-	                init();
-	                requestAnimFrame(loop);
-                });
+                init();
+                requestAnimFrame(loop);
             }
 
             function bootstrap(){
