@@ -1,8 +1,5 @@
-NO_OVERRIDE = 1;
-FINISH_PREVIOUS = 2;
 DEBUG = false;
 ORIGO = new THREE.Vector3(0, 0, 0);
-
 
 /* smoothstep interpolaties between a and b, at time t from 0 to 1 */
 function smoothstep(a, b, t) {
@@ -14,43 +11,26 @@ function lerp(a, b, t) {
 	return b * t + a * (1 - t);
 }
 
-analyserData = new Uint8Array(256);
-
 function update() {
 
-	mixer.analyser.getByteFrequencyData(analyserData);
-	lyte.x = Math.sin(t / (20000)) * side * 2;
-	lyte.z = Math.cos(t / (20000)) * side * 2;
-	camera.position.x = lyte.x+Math.sin(t / (20 * 2205)) * side * 8;
-	camera.position.z = lyte.z+Math.cos(t / (20 * 2205)) * side * 8;
+	camera.position.x = lyte.x + Math.sin(t / 44100) * side * 8;
+	camera.position.z = lyte.z + Math.cos(t / 44100) * side * 8;
 	light.position.x = -camera.position.x;
 	light.position.y = camera.position.y;
 	light.position.z = -camera.position.z;
 
-	var samples_per_hemiquaver = midi.ticks_per_beat / midi.ticks_per_second
-			* 44100 * 0.5;
+	var samples_per_quaver = midi.ticks_per_beat / midi.ticks_per_second * 44100;
 	for ( var i = 0; i < side * side; i++) {
-		if (t > 2112512) {
-			cubes[i].setGoalPosition(i * Math.sin(i / 1000000 * t), 0, i
-					* Math.cos(i / 1000000 * t), samples_per_hemiquaver * 2,
-					NO_OVERRIDE);
-		}
 		cubes[i].update();
 	}
-
 
 	kewbe.update();
 	lyte.update();
 }
 
 function render() {
-	/*
-		camera.position.y = Math.sin((t - 3500 * 2205) / (300 * 2205)) * 500;
-		camera.position.x = Math.sin((t - 3500 * 2205) / (100 * 2205)) * 200;
-		camera.position.z = Math.cos((t - 3500 * 2205) / (100 * 2205)) * 200;
-		*/
-		camera.lookAt(ORIGO);
-		kewbe.render();
+	camera.lookAt(ORIGO);
+	kewbe.render();
 	renderer.render(scene, camera);
 }
 
@@ -60,78 +40,42 @@ function vtv(a, b) {
 		var x = 0 | lerp(a.hexx, b.hexx, i);
 		var y = 0 | lerp(a.hexy, b.hexy, i);
 		if (x < side && x >= 0 && y < side && y >= 0) {
-			var idx = (x * side + y);
-			cubes[idx].punch(intensity, intensity, intensity);
+			cubes[x*side+y].punch(intensity);
 		}
 	}
 }
 
-COLORS = [ {
-	r : 0.5,
-	g : 1,
-	b : 0.5
-}, {
-	r : 1,
-	g : 0.5,
-	b : 1
-}, {
-	r : 1,
-	g : 0.5,
-	b : 0.5
-}, {
-	r : 0.5,
-	g : 1,
-	b : 1
-} ];
-
 function init() {
-	debug("entering init");
-	analyserAverage = 0;
 	var data = "TVRoZAAAAAYAAQAGAGBNVHJrAAAADAD/WAQEAhgIAP8vAE1UcmsAAAAZAP9RAwehIAD/UQMHoSAA/1EDB6EgAP8vAE1UcmsAAAmHAP8DE1BpYW5vIE1vZHVsZSAoTUlESSkAsApAALAHZADgAEAAsGUAALBkAACwBgwAsApAALAHZADgAEAAwAAAsGUAALBkAACwBgwAsApAALAHZADgAEAAwAAAsApAALAHZADgAEAAwAAAsGUAALBkAACwBgwAsApAALAHZADgAEAAwAAAsApAALAHZADgAEAAwAAwkDx/DIA8ACSQOX8MgDkADJA8fwyAPAA8kDx/DIA8ACSQOX8MgDkADJA8fwyAPAA8kDx/DIA8AAyQOX8MgDkADJA8fwyAPAAkkEF/DIBBACSQPn8MgD4ADJBBfwyAQQA8kEF/DIBBACSQPn8MgD4ADJBBfwyAQQA8kEF/DIBBAAyQPn8MgD4ADJA3fwyANwAkkDt/DIA7ACSQN38MgDcADJA7fwyAOwA8kDt/DIA7ACSQN38MgDcADJA7fwyAOwA8kDt/DIA7AAyQN38MgDcAPJBAfwyAQAAkkDx/DIA8AAyQQH8MgEAAPJBAfwyAQAAkkDx/DIA8AAyQQH8MgEAAPJBAfwyAQAAMkDx/DIA8ADyQOX8MgDkAJJA1fwyANQAMkDl/DIA5ADyQOX8MgDkAJJA1fwyANQAMkDl/DIA5ADyQOX8MgDkADJA1fwyANQAMkDd/DIA3ACSQO38MgDsAJJA3fwyANwAMkDt/DIA7ADyQO38MgDsAJJA3fwyANwAMkDt/DIA7ADyQO38MgDsADJA3fwyANwAMkDl/DIA5ACSQPH8MgDwAJJA5fwyAOQAMkDx/DIA8ADyQO38MgDsAJJA7fwyAOwAMkD5/DIA+ADyQPn8MgD4ADJA7fwyAOwAMkDx/DIA8ACSQQH8MgEAAJJA8fwyAPAAMkEB/DIBAADyQQH8MgEAAJJA8fwyAPAAMkEB/DIBAADyQQH8MgEAADJA8fwyAPAA8kDx/DIA8ACSQOX8MgDkADJA8fwyAPAA8kDx/DIA8ACSQOX8MgDkADJA8fwyAPAA8kDx/DIA8AAyQOX8MgDkADJA8fwyAPAAkkEF/DIBBACSQPn8MgD4ADJBBfwyAQQA8kEF/DIBBACSQPn8MgD4ADJBBfwyAQQA8kEF/DIBBAAyQPn8MgD4ADJA3fwyANwAkkDt/DIA7ACSQN38MgDcADJA7fwyAOwA8kDt/DIA7ACSQN38MgDcADJA7fwyAOwA8kDt/DIA7AAyQN38MgDcAPJBAfwyAQAAkkDx/DIA8AAyQQH8MgEAAPJBAfwyAQAAkkDx/DIA8AAyQQH8MgEAAPJBAfwyAQAAMkDx/DIA8ADyQOX8MgDkAJJA1fwyANQAMkDl/DIA5ADyQOX8MgDkAJJA1fwyANQAMkDl/DIA5ADyQOX8MgDkADJA1fwyANQAMkDd/DIA3ACSQO38MgDsAJJA3fwyANwAMkDt/DIA7ADyQO38MgDsAJJA3fwyANwAMkDt/DIA7ADyQO38MgDsADJA3fwyANwAMkDl/DIA5ACSQPH8MgDwAJJA5fwyAOQAMkDx/DIA8ADyQO38MgDsAJJA7fwyAOwAMkD5/DIA+ADyQPn8MgD4ADJA7fwyAOwAMkDx/DIA8ACSQQH8MgEAAJJA8fwyAPAAMkEB/DIBAADyQQH8MgEAAJJA8fwyAPAAMkEB/DIBAADyQQH8MgEAADJA8fwyAPAA8kDx/DIA8ACSQOX8MgDkADJA8fwyAPAA8kDx/DIA8ACSQOX8MgDkADJA8fwyAPAA8kDx/DIA8AAyQOX8MgDkADJA8fwyAPAAkkEF/DIBBACSQPn8MgD4ADJBBfwyAQQA8kEF/DIBBACSQPn8MgD4ADJBBfwyAQQA8kEF/DIBBAAyQPn8MgD4ADJA3fwyANwAkkDt/DIA7ACSQN38MgDcADJA7fwyAOwA8kDt/DIA7ACSQN38MgDcADJA7fwyAOwA8kDt/DIA7AAyQN38MgDcAPJBAfwyAQAAkkDx/DIA8AAyQQH8MgEAAPJBAfwyAQAAkkDx/DIA8AAyQQH8MgEAAPJBAfwyAQAAMkDx/DIA8ADyQOX8MgDkAJJA1fwyANQAMkDl/DIA5ADyQOX8MgDkAJJA1fwyANQAMkDl/DIA5ADyQOX8MgDkADJA1fwyANQAMkDd/DIA3ACSQO38MgDsAJJA3fwyANwAMkDt/DIA7ADyQO38MgDsAJJA3fwyANwAMkDt/DIA7ADyQO38MgDsADJA3fwyANwAMkDl/DIA5ACSQPH8MgDwAJJA5fwyAOQAMkDx/DIA8ADyQO38MgDsAJJA7fwyAOwAMkD5/DIA+ADyQPn8MgD4ADJA7fwyAOwAMkDx/DIA8ACSQQH8MgEAAJJA8fwyAPAAMkEB/DIBAADyQQH8MgEAAJJA8fwyAPAAMkEB/DIBAADyQQH8MgEAADJA8fwyAPAA8kDx/DIA8ACSQOX8MgDkADJA8fwyAPAA8kDx/DIA8ACSQOX8MgDkADJA8fwyAPAA8kDx/DIA8AAyQOX8MgDkADJA8fwyAPAAkkEF/DIBBACSQPn8MgD4ADJBBfwyAQQA8kEF/DIBBACSQPn8MgD4ADJBBfwyAQQA8kEF/DIBBAAyQPn8MgD4ADJA3fwyANwAkkDt/DIA7ACSQN38MgDcADJA7fwyAOwA8kDt/DIA7ACSQN38MgDcADJA7fwyAOwA8kDt/DIA7AAyQN38MgDcAPJBAfwyAQAAkkDx/DIA8AAyQQH8MgEAAPJBAfwyAQAAkkDx/DIA8AAyQQH8MgEAAPJBAfwyAQAAMkDx/DIA8ADyQOX8MgDkAJJA1fwyANQAMkDl/DIA5ADyQOX8MgDkAJJA1fwyANQAMkDl/DIA5ADyQOX8MgDkADJA1fwyANQAMkDd/DIA3ACSQO38MgDsAJJA3fwyANwAMkDt/DIA7ADyQO38MgDsAJJA3fwyANwAMkDt/DIA7ADyQO38MgDsADJA3fwyANwAMkDl/DIA5ACSQPH8MgDwAJJA5fwyAOQAMkDx/DIA8ADyQO38MgDsAJJA7fwyAOwAMkD5/DIA+ADyQPn8MgD4ADJA7fwyAOwAMkDx/DIA8ACSQQH8MgEAAJJA8fwyAPAAMkEB/DIBAADyQQH8MgEAAJJA8fwyAPAAMkEB/DIBAADyQQH8MgEAADJA8fwyAPAAMsGUAALBkAACwBgwAsApAALAHZADgAEAAwAACsGUAALBkAACwBgwAsApAALAHZADgAEAAwAAAsGUAALBkAACwBgwAsApAALAHZADgAEAAwAAA/y8ATVRyawAACEoA/wMWUGlhbm8gTW9kdWxlICMyIChNSURJKQCxCkAAsQdkAOEAQACxZQAAsWQAALEGDACxCkAAsQdkAOEAQADBAACxZQAAsWQAALEGDACxCkAAsQdkAOEAQADBAACxCkAAsQdkAOEAQADBAACxZQAAsWQAALEGDACxCkAAsQdkAOEAQADBAACxCkAAsQdkAOEAQADBAACRLX8MgS0ADJEtfwyBLQAkkS1/DIEtADyRLX8MgS0ADJEtfwyBLQAkkS1/DIEtADyRLX8MgS0ADJEtfxiBLQBIkTJ/DIEyACSRMn8MgTIAPJEyfwyBMgAMkTJ/DIEyACSRMn8MgTIAPJEyfwyBMgAMkTJ/GIEyAEiRK38MgSsAJJErfwyBKwA8kSt/DIErAAyRK38MgSsAJJErfwyBKwA8kSt/DIErAAyRK38YgSsAMJEwfwyBMAAMkTB/DIEwACSRMH8MgTAAPJEwfwyBMAAMkTB/DIEwACSRMH8MgTAAPJEwfwyBMAAMkTB/GIEwADCRKX8MgSkADJEpfwyBKQAkkSl/DIEpADyRKX8MgSkADJEpfwyBKQAkkSl/DIEpADyRKX8MgSkADJEpfxiBKQBIkSt/DIErACSRK38MgSsAPJErfwyBKwAMkSt/DIErACSRK38MgSsAPJErfwyBKwAMkSt/GIErAEiRLX8MgS0AJJEtfwyBLQA8kS1/DIEtAAyRLX8MgS0AJJEvfwyBLwA8kS9/DIEvAAyRL38YgS8ASJEwfwyBMAAkkTB/DIEwADyRMH8MgTAADJEwfwyBMAAkkTB/DIEwADyRMH8MgTAADJEwfxiBMAAwkS1/DIEtAAyRLX8MgS0AJJEtfwyBLQA8kS1/DIEtAAyRLX8MgS0AJJEtfwyBLQA8kS1/DIEtAAyRLX8YgS0ASJEyfwyBMgAkkTJ/DIEyADyRMn8MgTIADJEyfwyBMgAkkTJ/DIEyADyRMn8MgTIADJEyfxiBMgBIkSt/DIErACSRK38MgSsAPJErfwyBKwAMkSt/DIErACSRK38MgSsAPJErfwyBKwAMkSt/GIErADCRMH8MgTAADJEwfwyBMAAkkTB/DIEwADyRMH8MgTAADJEwfwyBMAAkkTB/DIEwADyRMH8MgTAADJEwfxiBMAAwkSl/DIEpAAyRKX8MgSkAJJEpfwyBKQA8kSl/DIEpAAyRKX8MgSkAJJEpfwyBKQA8kSl/DIEpAAyRKX8YgSkASJErfwyBKwAkkSt/DIErADyRK38MgSsADJErfwyBKwAkkSt/DIErADyRK38MgSsADJErfxiBKwBIkS1/DIEtACSRLX8MgS0APJEtfwyBLQAMkS1/DIEtACSRL38MgS8APJEvfwyBLwAMkS9/GIEvAEiRMH8MgTAAJJEwfwyBMAA8kTB/DIEwAAyRMH8MgTAAJJEwfwyBMAA8kTB/DIEwAAyRMH8YgTAAMJEtfwyBLQAMkS1/DIEtACSRLX8MgS0APJEtfwyBLQAMkS1/DIEtACSRLX8MgS0APJEtfwyBLQAMkS1/GIEtAEiRMn8MgTIAJJEyfwyBMgA8kTJ/DIEyAAyRMn8MgTIAJJEyfwyBMgA8kTJ/DIEyAAyRMn8YgTIASJErfwyBKwAkkSt/DIErADyRK38MgSsADJErfwyBKwAkkSt/DIErADyRK38MgSsADJErfxiBKwAwkTB/DIEwAAyRMH8MgTAAJJEwfwyBMAA8kTB/DIEwAAyRMH8MgTAAJJEwfwyBMAA8kTB/DIEwAAyRMH8YgTAAMJEpfwyBKQAMkSl/DIEpACSRKX8MgSkAPJEpfwyBKQAMkSl/DIEpACSRKX8MgSkAPJEpfwyBKQAMkSl/GIEpAEiRK38MgSsAJJErfwyBKwA8kSt/DIErAAyRK38MgSsAJJErfwyBKwA8kSt/DIErAAyRK38YgSsASJEtfwyBLQAkkS1/DIEtADyRLX8MgS0ADJEtfwyBLQAkkS9/DIEvADyRL38MgS8ADJEvfxiBLwBIkTB/DIEwACSRMH8MgTAAPJEwfwyBMAAMkTB/DIEwACSRMH8MgTAAPJEwfwyBMAAMkTB/GIEwADCRLX8MgS0ADJEtfwyBLQAkkS1/DIEtADyRLX8MgS0ADJEtfwyBLQAkkS1/DIEtADyRLX8MgS0ADJEtfxiBLQBIkTJ/DIEyACSRMn8MgTIAPJEyfwyBMgAMkTJ/DIEyACSRMn8MgTIAPJEyfwyBMgAMkTJ/GIEyAEiRK38MgSsAJJErfwyBKwA8kSt/DIErAAyRK38MgSsAJJErfwyBKwA8kSt/DIErAAyRK38YgSsAMJEwfwyBMAAMkTB/DIEwACSRMH8MgTAAPJEwfwyBMAAMkTB/DIEwACSRMH8MgTAAPJEwfwyBMAAMkTB/GIEwADCRKX8MgSkADJEpfwyBKQAkkSl/DIEpADyRKX8MgSkADJEpfwyBKQAkkSl/DIEpADyRKX8MgSkADJEpfxiBKQBIkSt/DIErACSRK38MgSsAPJErfwyBKwAMkSt/DIErACSRK38MgSsAPJErfwyBKwAMkSt/GIErAEiRLX8MgS0AJJEtfwyBLQA8kS1/DIEtAAyRLX8MgS0AJJEvfwyBLwA8kS9/DIEvAAyRL38YgS8ASJEwfwyBMAAkkTB/DIEwADyRMH8MgTAADJEwfwyBMAAkkTB/DIEwADyRMH8MgTAADJEwfxiBMAAwsWUAALFkAACxBgwAsQpAALEHZADhAEAAwQACsWUAALFkAACxBgwAsQpAALEHZADhAEAAwQAAsWUAALFkAACxBgwAsQpAALEHZADhAEAAwQAA/y8ATVRyawAAIogA/wMITUlESSBvdXQAsgpAALIHZADiAEAAsmUAALJkAACyBgwAsgpAALIHZADiAEAAwgAAsmUAALJkAACyBgwAsgpAALIHZADiAEAAwgAAsmUAALJkAACyBgwAsgpAALIHZADiAEAAwgCYAJJIZACSQGQAkkVkAJJDZIMAgkNAAIJIQACCQEAAgkVAAJJIZACSRWQAkkFkAJI+ZIMAgj5AAIJBQACCRUAAgkhAAJI+ZACSQ2QAkkdkAJJFZIMAgj5AAIJFQACCR0AAgkNAAJJHZACSQ2QAkkBkAJI8ZIMAgjxAAIJAQACCQ0AAgkdAAJJAZACSQWQAkkhkAJJFZIMAgkVAAIJIQACCQUAAgkBAAJJFZACSR2QAkj5kAJJDZIMAgkVAAIJDQACCPkAAgkdAAJI+ZACSQ2QAkkdkAJJFZIEQgj5AAIJFQACCR0AAgkNAAJJAZACSQ2QAkkVkAJJIZGCCQEAAgkhAAIJFQACCQ0AAkkdkAJJDZACSRWQAkj5kgRCCPkAAgkVAAIJDQACCR0AAkj5kAJJAZACSQ2QAkkhkgwCCSEAAgkNAAIJAQACCPkAAkkhiAJJAYgCSRWIAkkNiGIJDQACCRUAAgkBAAIJIQACSQzcAkkU3AJJANwCSSDcWgkhAAIJAQACCRUAAgkNAAJJIdwCSQHcAkkV3AJJDdxqCQ0AAgkVAAIJAQACCSEAAkkNMAJJFTACSQEwAkkhMGIJIQACCQEAAgkVAAIJDQACSQ2IAkkViAJJAYgCSSGIZgkhAAIJAQACCRUAAgkNAAJJIdwCSQHcAkkV3AJJDdxiCQ0AAgkVAAIJAQACCSEAAkkg2AJJANgCSRTYAkkM2F4JDQACCRUAAgkBAAIJIQACSQzcAkkU3AJJANwCSSDcZgkhAAIJAQACCRUAAgkNAAJJIdwCSQHcAkkV3AJJDdxiCSEAAgkNAAIJFQACCQEAAkkhLAJJASwCSRUsAkkNLGIJDQACCRUAAgkBAAIJIQACSQ2IAkkViAJJAYgCSSGIXgkhAAIJAQACCRUAAgkNAAJJDdwCSRXcAkkB3AJJIdxiCSEAAgkBAAIJFQACCQ0AAkkM3AJJFNwCSQDcAkkg3F5JIYgCSQGIAkkViAJJDYgKCSEAAgkBAAIJFQACCQ0AXgkNAAIJFQACCQEAAgkhAAJJIdwCSQHcAkkV3AJJDdxiCSEAAgkNAAIJFQACCQEAAkkhiAJJAYgCSRWIAkkNiGIJIQACCQ0AAgkVAAIJAQACSPmIAkkFiAJJFYgCSSGIYgkhAAIJFQACCQUAAgj5AAJI+NgCSQTYAkkU2AJJINhaCSEAAgkVAAIJBQACCPkAAkkh3AJJFdwCSQXcAkj53GoI+QACCQUAAgkVAAIJIQACSPk0AkkFNAJJFTQCSSE0YgkhAAIJFQACCQUAAgj5AAJJIYgCSRWIAkkFiAJI+YhmCSEAAgj5AAIJBQACCRUAAkkh3AJJFdwCSQXcAkj53GII+QACCQUAAgkVAAIJIQACSPjcAkkE3AJJFNwCSSDcXgkhAAIJFQACCQUAAgj5AAJI+NwCSQTcAkkU3AJJINxmCSEAAgkVAAIJBQACCPkAAkj53AJJBdwCSRXcAkkh3F4JIQACCRUAAgkFAAII+QACSPk0AkkFNAJJFTQCSSE0WgkhAAIJFQACCQUAAgj5AAJJIYwCSRWMAkkFjAJI+YxqCPkAAgkFAAIJFQACCSEAAkj53AJJBdwCSRXcAkkh3GIJIQACCRUAAgkFAAII+QACSSDcAkkU3AJJBNwCSPjcXkkhiAJJFYgCSQWIAkj5iAoI+QACCQUAAgkVAAIJIQBeCPkAAgkFAAIJFQACCSEAAkj53AJJBdwCSRXcAkkh3GIJIQACCRUAAgkFAAII+QACSSGIAkkViAJJBYgCSPmIYgkhAAII+QACCQUAAgkVAAJI+YgCSQ2IAkkdiAJJFYhiCPkAAgkVAAIJHQACCQ0AAkkU3AJJHNwCSQzcAkj43FoI+QACCQ0AAgkdAAIJFQACSRXcAkkd3AJJDdwCSPncagj5AAIJDQACCR0AAgkVAAJI+TACSQ0wAkkdMAJJFTBiCPkAAgkVAAIJHQACCQ0AAkkViAJJHYgCSQ2IAkj5iGYI+QACCQ0AAgkdAAIJFQACSPncAkkN3AJJHdwCSRXcYgkVAAIJHQACCQ0AAgj5AAJI+NgCSQzYAkkc2AJJFNheCRUAAgkdAAIJDQACCPkAAkj43AJJDNwCSRzcAkkU3GYI+QACCRUAAgkdAAIJDQACSRXcAkkd3AJJDdwCSPncYgj5AAIJDQACCR0AAgkVAAJJFSwCSR0sAkkNLAJI+SxiCPkAAgkNAAIJHQACCRUAAkj5iAJJDYgCSR2IAkkViF4JFQACCR0AAgkNAAII+QACSRXcAkkd3AJJDdwCSPncYgj5AAIJDQACCR0AAgkVAAJJFNwCSRzcAkkM3AJI+NxeSPmIAkkNiAJJHYgCSRWICgj5AAIJDQACCR0AAgkVAF4JFQACCR0AAgkNAAII+QACSPncAkkN3AJJHdwCSRXcYgkVAAIJHQACCQ0AAgj5AAJI+YgCSQ2IAkkdiAJJFYhiCRUAAgkdAAIJDQACCPkAAkjxiAJJAYgCSQ2IAkkdiGIJHQACCQ0AAgkBAAII8QACSPDYAkkA2AJJDNgCSRzYWgkdAAIJDQACCQEAAgjxAAJJHdwCSQ3cAkkB3AJI8dxqCPEAAgkBAAIJDQACCR0AAkjxNAJJATQCSQ00AkkdNGIJHQACCQ0AAgkBAAII8QACSR2IAkkNiAJJAYgCSPGIZgkdAAII8QACCQEAAgkNAAJJHdwCSQ3cAkkB3AJI8dxiCPEAAgkBAAIJDQACCR0AAkjw3AJJANwCSQzcAkkc3F4JHQACCQ0AAgkBAAII8QACSPDcAkkA3AJJDNwCSRzcZgkdAAIJDQACCQEAAgjxAAJI8dwCSQHcAkkN3AJJHdxeCPEAAgkdAAIJDQACCQEAAkkdNAJJDTQCSQE0AkjxNFoJHQACCPEAAgkBAAIJDQACSR2MAkkNjAJJAYwCSPGMagjxAAIJAQACCQ0AAgkdAAJJHdwCSQ3cAkkB3AJI8dxiCR0AAgjxAAIJAQACCQ0AAkkc3AJJDNwCSQDcAkjw3F5I8YgCSQGIAkkNiAJJHYgKCQ0AAgjxAAIJAQACCR0AXgkdAAIJDQACCQEAAgjxAAJI8dwCSQHcAkkN3AJJHdxiCR0AAgkNAAIJAQACCPEAAkkdiAJJDYgCSQGIAkjxiGIJHQACCPEAAgkBAAIJDQACSQGIAkkFiAJJIYgCSRWIYgkVAAIJIQACCQUAAgkBAAJJANwCSQTcAkkg3AJJFNxaCQEAAgkVAAIJIQACCQUAAkkV3AJJIdwCSQXcAkkB3GoJAQACCQUAAgkhAAIJFQACSRUwAkkhMAJJBTACSQEwYgkBAAIJBQACCSEAAgkVAAJJAYgCSQWIAkkhiAJJFYhmCQEAAgkVAAIJIQACCQUAAkkB3AJJBdwCSSHcAkkV3GIJFQACCSEAAgkFAAIJAQACSQDYAkkE2AJJINgCSRTYXgkVAAIJIQACCQUAAgkBAAJJFNwCSSDcAkkE3AJJANxmCQEAAgkFAAIJIQACCRUAAkkV3AJJIdwCSQXcAkkB3GIJFQACCQEAAgkFAAIJIQACSRUsAkkhLAJJBSwCSQEsYgkBAAIJBQACCSEAAgkVAAJJAYgCSQWIAkkhiAJJFYheCRUAAgkhAAIJBQACCQEAAkkB3AJJBdwCSSHcAkkV3GIJAQACCRUAAgkhAAIJBQACSQDcAkkE3AJJINwCSRTcXkkViAJJIYgCSQWIAkkBiAoJAQACCRUAAgkhAAIJBQBeCQEAAgkFAAIJIQACCRUAAkkV3AJJIdwCSQXcAkkB3GIJAQACCQUAAgkhAAIJFQACSRWIAkkhiAJJBYgCSQGIYgkBAAIJBQACCSEAAgkVAAJJFYgCSR2IAkj5iAJJDYhiCRUAAgkNAAII+QACCR0AAkkU2AJJHNgCSPjYAkkM2FoJFQACCQ0AAgj5AAIJHQACSRXcAkkd3AJI+dwCSQ3cagkNAAII+QACCR0AAgkVAAJJDTQCSPk0AkkdNAJJFTRiCRUAAgkdAAII+QACCQ0AAkkViAJJHYgCSPmIAkkNiGYJFQACCQ0AAgj5AAIJHQACSQ3cAkj53AJJHdwCSRXcYgkVAAIJHQACCPkAAgkNAAJJFNwCSRzcAkj43AJJDNxeCQ0AAgj5AAIJHQACCRUAAkkM3AJI+NwCSRzcAkkU3GYJFQACCR0AAgj5AAIJDQACSRXcAkkd3AJI+dwCSQ3cXgkNAAII+QACCR0AAgkVAAJJFTQCSR00Akj5NAJJDTRaCRUAAgkNAAII+QACCR0AAkkNjAJI+YwCSR2MAkkVjGoJFQACCR0AAgj5AAIJDQACSRXcAkkd3AJI+dwCSQ3cYgkVAAIJDQACCPkAAgkdAAJJDNwCSPjcAkkc3AJJFNxeSQ2IAkj5iAJJHYgCSRWICgkVAAIJHQACCPkAAgkNAF4JFQACCR0AAgj5AAIJDQACSRXcAkkd3AJI+dwCSQ3cYgkVAAIJDQACCPkAAgkdAAJJDYgCSPmIAkkdiAJJFYhiCRUAAgkdAAII+QACCQ0AAkkViAJJHYgCSQ2IAkj5iGII+QACCQ0AAgkdAAIJFQACSRTcAkkc3AJJDNwCSPjcWgj5AAIJDQACCR0AAgkVAAJJFdwCSR3cAkkN3AJI+dxqCPkAAgkNAAIJHQACCRUAAkkVMAJJHTACSQ0wAkj5MGII+QACCQ0AAgkdAAIJFQACSRWIAkkdiAJJDYgCSPmIZgj5AAIJDQACCR0AAgkVAAJI+dwCSQ3cAkkd3AJJFdxeCRUAAgkdAAIJDQACCPkAAkkB3AJJDdwCSRXcAkkh3AYJIQACCRUAAgkNAAIJAQACSQDYAkkM2AJJFNgCSSDYXgkBAAIJIQACCRUAAgkNAAJJANwCSQzcAkkU3AJJINxmCQEAAgkhAAIJFQACCQ0AAkkh3AJJFdwCSQ3cAkkB3GIJAQACCQ0AAgkVAAIJIQACSSEsAkkVLAJJDSwCSQEsXgkBAAIJDQACCRUAAgkhAAJI+SwCSRUsAkkNLAJJHSwGCR0AAgkNAAIJFQACCPkAAkj5iAJJFYgCSQ2IAkkdiF4JHQACCQ0AAgkVAAII+QACSPncAkkV3AJJDdwCSR3cYgkdAAIJDQACCRUAAgj5AAJI+NwCSRTcAkkM3AJJHNxeSPmIAkkViAJJDYgCSR2ICgkdAAIJDQACCRUAAgj5AF4JHQACCQ0AAgkVAAII+QACSR3cAkkN3AJJFdwCSPncYgkdAAII+QACCRUAAgkNAAJJHYgCSQ2IAkkViAJI+YhiCR0AAgj5AAIJFQACCQ0AAkkhiAJJDYgCSQGIAkj5iGII+QACCQEAAgkNAAIJIQACSSDYAkkM2AJJANgCSPjYWgj5AAIJAQACCQ0AAgkhAAJI+dwCSQHcAkkN3AJJIdxqCSEAAgkNAAIJAQACCPkAAkkhNAJJDTQCSQE0Akj5NGII+QACCQEAAgkNAAIJIQACSPmIAkkBiAJJDYgCSSGIZgj5AAIJIQACCQ0AAgkBAAJJIdwCSQ3cAkkB3AJI+dxiCPkAAgkBAAIJDQACCSEAAkkg3AJJDNwCSQDcAkj43F4I+QACCQEAAgkNAAIJIQACSSDcAkkM3AJJANwCSPjcZgj5AAIJAQACCQ0AAgkhAAJJIdwCSQ3cAkkB3AJI+dxeCPkAAgkBAAIJDQACCSEAAkj5NAJJATQCSQ00AkkhNFoI+QACCSEAAgkNAAIJAQACSPmMAkkBjAJJDYwCSSGMagkhAAIJDQACCQEAAgj5AAJI+dwCSQHcAkkN3AJJIdxiCPkAAgkhAAIJDQACCQEAAkkg3AJJDNwCSQDcAkj43F5JIYgCSQ2IAkkBiAJI+YgKCPkAAgkBAAIJDQACCSEAXgj5AAIJAQACCQ0AAgkhAAJJIdwCSQ3cAkkB3AJI+dxiCPkAAgkBAAIJDQACCSEAAkkhiAJJDYgCSQGIAkj5iGII+QACCQEAAgkNAAIJIQACSSGIAkkBiAJJFYgCSQ2IYgkNAAIJFQACCQEAAgkhAAJJINwCSQDcAkkU3AJJDNxaCQ0AAgkVAAIJAQACCSEAAkkh3AJJAdwCSRXcAkkN3GoJDQACCRUAAgkBAAIJIQACSSEwAkkBMAJJFTACSQ0wYgkNAAIJFQACCQEAAgkhAAJJIYgCSQGIAkkViAJJDYhmCSEAAgkNAAIJFQACCQEAAkkh3AJJAdwCSRXcAkkN3GIJDQACCRUAAgkBAAIJIQACSSDYAkkA2AJJFNgCSQzYXgkNAAIJFQACCQEAAgkhAAJJINwCSQDcAkkU3AJJDNxmCSEAAgkNAAIJFQACCQEAAkkh3AJJAdwCSRXcAkkN3GIJIQACCQ0AAgkVAAIJAQACSSEsAkkBLAJJFSwCSQ0sYgkNAAIJFQACCQEAAgkhAAJJIYgCSQGIAkkViAJJDYheCQ0AAgkVAAIJAQACCSEAAkkh3AJJAdwCSRXcAkkN3GIJIQACCQ0AAgkVAAIJAQACSSDcAkkA3AJJFNwCSQzcXkkhiAJJAYgCSRWIAkkNiAoJDQACCRUAAgkBAAIJIQBeCQ0AAgkVAAIJAQACCSEAAkkh3AJJAdwCSRXcAkkN3GIJIQACCQ0AAgkVAAIJAQACSSGIAkkBiAJJFYgCSQ2IYgkNAAIJFQACCQEAAgkhAAJJIYgCSRWIAkkFiAJI+YhiCPkAAgkFAAIJFQACCSEAAkkg2AJJFNgCSQTYAkj42FoI+QACCQUAAgkVAAIJIQACSSHcAkkV3AJJBdwCSPncagj5AAIJBQACCRUAAgkhAAJJITQCSRU0AkkFNAJI+TRiCPkAAgkFAAIJFQACCSEAAkkhiAJJFYgCSQWIAkj5iGYI+QACCQUAAgkVAAIJIQACSSHcAkkV3AJJBdwCSPncYgj5AAIJBQACCRUAAgkhAAJJINwCSRTcAkkE3AJI+NxeCPkAAgkFAAIJFQACCSEAAkkg3AJJFNwCSQTcAkj43GYI+QACCQUAAgkVAAIJIQACSSHcAkkV3AJJBdwCSPncXgj5AAIJBQACCRUAAgkhAAJJITQCSRU0AkkFNAJI+TRaCPkAAgkFAAIJFQACCSEAAkkhjAJJFYwCSQWMAkj5jGoI+QACCQUAAgkVAAIJIQACSSHcAkkV3AJJBdwCSPncYgkhAAII+QACCQUAAgkVAAJJINwCSRTcAkkE3AJI+NxeSSGIAkkViAJJBYgCSPmICgj5AAIJBQACCRUAAgkhAF4I+QACCQUAAgkVAAIJIQACSSHcAkkV3AJJBdwCSPncYgj5AAIJBQACCRUAAgkhAAJJIYgCSRWIAkkFiAJI+YhiCPkAAgkFAAIJFQACCSEAAkj5iAJJDYgCSR2IAkkViGIJFQACCR0AAgkNAAII+QACSPjcAkkM3AJJHNwCSRTcWgkVAAIJHQACCQ0AAgj5AAJI+dwCSQ3cAkkd3AJJFdxqCRUAAgkdAAIJDQACCPkAAkj5MAJJDTACSR0wAkkVMGIJFQACCR0AAgkNAAII+QACSPmIAkkNiAJJHYgCSRWIZgkVAAIJHQACCQ0AAgj5AAJI+dwCSQ3cAkkd3AJJFdxiCRUAAgkdAAIJDQACCPkAAkj42AJJDNgCSRzYAkkU2F4JFQACCR0AAgkNAAII+QACSPjcAkkM3AJJHNwCSRTcZgj5AAIJFQACCR0AAgkNAAJI+dwCSQ3cAkkd3AJJFdxiCRUAAgkdAAIJDQACCPkAAkj5LAJJDSwCSR0sAkkVLGIJFQACCR0AAgkNAAII+QACSPmIAkkNiAJJHYgCSRWIXgkVAAIJHQACCQ0AAgj5AAJI+dwCSQ3cAkkd3AJJFdxiCRUAAgkdAAIJDQACCPkAAkj43AJJDNwCSRzcAkkU3F5I+YgCSQ2IAkkdiAJJFYgKCRUAAgkdAAIJDQACCPkAXgkVAAIJHQACCQ0AAgj5AAJI+dwCSQ3cAkkd3AJJFdxiCRUAAgkdAAIJDQACCPkAAkj5iAJJDYgCSR2IAkkViGIJFQACCR0AAgkNAAII+QACSR2IAkkNiAJJAYgCSPGIYgkdAAII8QACCQEAAgkNAAJJHNgCSQzYAkkA2AJI8NhaCPEAAgkBAAIJDQACCR0AAkkd3AJJDdwCSQHcAkjx3GoI8QACCQEAAgkNAAIJHQACSR00AkkNNAJJATQCSPE0YgjxAAIJAQACCQ0AAgkdAAJJHYgCSQ2IAkkBiAJI8YhmCR0AAgjxAAIJAQACCQ0AAkkd3AJJDdwCSQHcAkjx3GII8QACCQEAAgkNAAIJHQACSRzcAkkM3AJJANwCSPDcXgjxAAIJAQACCQ0AAgkdAAJJHNwCSQzcAkkA3AJI8NxmCR0AAgjxAAIJAQACCQ0AAkkd3AJJDdwCSQHcAkjx3F4I8QACCQEAAgkNAAIJHQACSR00AkkNNAJJATQCSPE0WgjxAAIJAQACCQ0AAgkdAAJJHYwCSQ2MAkkBjAJI8YxqCPEAAgkBAAIJDQACCR0AAkkd3AJJDdwCSQHcAkjx3GIJHQACCPEAAgkBAAIJDQACSRzcAkkM3AJJANwCSPDcXkkdiAJJDYgCSQGIAkjxiAoI8QACCQEAAgkNAAIJHQBeCPEAAgkBAAIJDQACCR0AAkkd3AJJDdwCSQHcAkjx3GII8QACCQEAAgkNAAIJHQACSR2IAkkNiAJJAYgCSPGIYgjxAAIJAQACCQ0AAgkdAAJJAYgCSQWIAkkhiAJJFYhiCRUAAgkhAAIJBQACCQEAAkkA3AJJBNwCSSDcAkkU3FoJFQACCSEAAgkFAAIJAQACSQHcAkkF3AJJIdwCSRXcagkVAAIJIQACCQUAAgkBAAJJATACSQUwAkkhMAJJFTBiCRUAAgkhAAIJBQACCQEAAkkBiAJJBYgCSSGIAkkViGYJAQACCRUAAgkhAAIJBQACSQHcAkkF3AJJIdwCSRXcYgkVAAIJIQACCQUAAgkBAAJJANgCSQTYAkkg2AJJFNheCRUAAgkhAAIJBQACCQEAAkkA3AJJBNwCSSDcAkkU3GYJAQACCRUAAgkhAAIJBQACSQHcAkkF3AJJIdwCSRXcYgkBAAIJFQACCSEAAgkFAAJJASwCSQUsAkkhLAJJFSxiCRUAAgkhAAIJBQACCQEAAkkBiAJJBYgCSSGIAkkViF4JFQACCSEAAgkFAAIJAQACSQHcAkkF3AJJIdwCSRXcYgkBAAIJFQACCSEAAgkFAAJJANwCSQTcAkkg3AJJFNxeSQGIAkkFiAJJIYgCSRWICgkVAAIJIQACCQUAAgkBAF4JFQACCSEAAgkFAAIJAQACSQHcAkkF3AJJIdwCSRXcYgkVAAIJIQACCQUAAgkBAAJJAYgCSQWIAkkhiAJJFYhiCRUAAgkhAAIJBQACCQEAAkkViAJJHYgCSPmIAkkNiGIJFQACCQ0AAgj5AAIJHQACSRTYAkkc2AJI+NgCSQzYWgkNAAII+QACCR0AAgkVAAJJFdwCSR3cAkj53AJJDdxqCQ0AAgj5AAIJHQACCRUAAkkVNAJJHTQCSPk0AkkNNGIJDQACCPkAAgkdAAIJFQACSRWIAkkdiAJI+YgCSQ2IZgkVAAIJDQACCPkAAgkdAAJJFdwCSR3cAkj53AJJDdxiCQ0AAgj5AAIJHQACCRUAAkkU3AJJHNwCSPjcAkkM3F4JDQACCPkAAgkdAAIJFQACSRTcAkkc3AJI+NwCSQzcZgkVAAIJDQACCPkAAgkdAAJJFdwCSR3cAkj53AJJDdxeCQ0AAgj5AAIJHQACCRUAAkkVNAJJHTQCSPk0AkkNNFoJDQACCPkAAgkdAAIJFQACSRWMAkkdjAJI+YwCSQ2MagkNAAII+QACCR0AAgkVAAJJFdwCSR3cAkj53AJJDdxiCRUAAgkNAAII+QACCR0AAkkU3AJJHNwCSPjcAkkM3F5JFYgCSR2IAkj5iAJJDYgKCQ0AAgj5AAIJHQACCRUAXgkNAAII+QACCR0AAgkVAAJJFdwCSR3cAkj53AJJDdxiCQ0AAgj5AAIJHQACCRUAAkkViAJJHYgCSPmIAkkNiGIJDQACCPkAAgkdAAIJFQACSPmIAkkNiAJJHYgCSRWIYgkVAAIJHQACCQ0AAgj5AAJI+NwCSQzcAkkc3AJJFNxaCRUAAgkdAAIJDQACCPkAAkj53AJJDdwCSR3cAkkV3GoJFQACCR0AAgkNAAII+QACSPkwAkkNMAJJHTACSRUwYgkVAAIJHQACCQ0AAgj5AAJI+YgCSQ2IAkkdiAJJFYhmCPkAAgkVAAIJHQACCQ0AAkj53AJJDdwCSR3cAkkV3F4JFQACCR0AAgkNAAII+QACSQHcAkkN3AJJFdwCSSHcBgkhAAIJFQACCQ0AAgkBAAJJANgCSQzYAkkU2AJJINheCSEAAgkVAAIJDQACCQEAAkkA3AJJDNwCSRTcAkkg3GYJAQACCSEAAgkVAAIJDQACSQHcAkkN3AJJFdwCSSHcYgkBAAIJIQACCRUAAgkNAAJJASwCSQ0sAkkVLAJJISxeCSEAAgkVAAIJDQACCQEAAkkdLAJJDSwCSRUsAkj5LAYI+QACCRUAAgkNAAIJHQACSR2IAkkNiAJJFYgCSPmIXgj5AAIJFQACCQ0AAgkdAAJJHdwCSQ3cAkkV3AJI+dxiCR0AAgj5AAIJFQACCQ0AAkkc3AJJDNwCSRTcAkj43F5JHYgCSQ2IAkkViAJI+YgKCPkAAgkVAAIJDQACCR0AXgj5AAIJFQACCQ0AAgkdAAJJHdwCSQ3cAkkV3AJI+dxiCR0AAgj5AAIJFQACCQ0AAkkdiAJJDYgCSRWIAkj5iGII+QACCRUAAgkNAAIJHQACSPmIAkkBiAJJDYgCSSGIYgj5AAIJIQACCQ0AAgkBAAJI+NgCSQDYAkkM2AJJINhaCSEAAgkNAAIJAQACCPkAAkj53AJJAdwCSQ3cAkkh3GoJIQACCQ0AAgkBAAII+QACSPk0AkkBNAJJDTQCSSE0YgkhAAIJDQACCQEAAgj5AAJI+YgCSQGIAkkNiAJJIYhmCPkAAgkhAAIJDQACCQEAAkj53AJJAdwCSQ3cAkkh3GIJIQACCQ0AAgkBAAII+QACSPjcAkkA3AJJDNwCSSDcXgkhAAIJDQACCQEAAgj5AAJI+NwCSQDcAkkM3AJJINxmCPkAAgkhAAIJDQACCQEAAkj53AJJAdwCSQ3cAkkh3F4JIQACCQ0AAgkBAAII+QACSPk0AkkBNAJJDTQCSSE0WgkhAAIJDQACCQEAAgj5AAJI+YwCSQGMAkkNjAJJIYxqCSEAAgkNAAIJAQACCPkAAkj53AJJAdwCSQ3cAkkh3GII+QACCSEAAgkNAAIJAQACSPjcAkkA3AJJDNwCSSDcXkj5iAJJAYgCSQ2IAkkhiAoJIQACCQ0AAgkBAAII+QBeCSEAAgkNAAIJAQACCPkAAkkh3AJJDdwCSQHcAkj53GII+QACCQEAAgkNAAIJIQACSSGIAkkNiAJJAYgCSPmIYgkhAAII+QACCQEAAgkNAALJlAACyZAAAsgYMALIKQACyB2QA4gBAAMIAArJlAACyZAAAsgYMALIKQACyB2QA4gBAAMIAALJlAACyZAAAsgYMALIKQACyB2QA4gBAAMIAAP8vAE1UcmsAAAUMAP8DC01JREkgb3V0ICMyALMKQACzB2QA4wBAALNlAACzZAAAswYMALMKQACzB2QA4wBAALNlAACzZAAAswYMALMKQACzB2QA4wBAALNlAACzZAAAswYMALMKQACzB2QA4wBAryCTQ2wFg0NAAJNEbAeDREAAk0VsCYNFQACTRm0Jg0ZAAJNHbgmDR0AAk0hwCYNIQACTSXEIg0lAAJNKcgmDSkAAk0tzCYNLQACTTHQJg0xAAJNNdgmDTUAAk053BINOQACTT3eBQINPQGCTUXRgg1FAAJNUeWCDVEAAk1Z5MINWQACTUXkYg1FAAJNUeXiDVEAAk0NsBYNDQACTRGwHg0RAAJNFbAmDRUAAk0ZtCYNGQACTR24Jg0dAAJNIcAmDSEAAk0lxCINJQACTSnIJg0pAAJNLcwmDS0AAk0x0CYNMQACTTXYJg01AAJNOdwSDTkAAk093MINPQACTUXcwg1FAAJNUdzCDVEAAk1Z3MINWQACTWHcwg1hAAJNRdxiDUUAAk1R3SINUQACTVncYg1ZAAJNYd4FYg1hAYJNFbAWDRUAAk0ZsB4NGQACTR2wJg0dAAJNIbQmDSEAAk0luCYNJQACTSnAJg0pAAJNLcQiDS0AAk0xyCYNMQACTTXMJg01AAJNOdAmDTkAAk092CYNPQACTUHcEg1BAAJNRd4FAg1FAYJNUdzCDVEAAk1Z3GINWQACTUXeBWINRQACTT3dgg09AAJNFbAWDRUAAk0ZsB4NGQACTR2wJg0dAAJNIbQmDSEAAk0luCYNJQACTSnAJg0pAAJNLcQiDS0AAk0xyCYNMQACTTXMJg01AAJNOdAmDTkAAk092CYNPQACTUHcEg1BAAJNRd4FAg1FAg2CTQ2wFg0NAAJNEbAeDREAAk0VsCYNFQACTRm0Jg0ZAAJNHbgmDR0AAk0hwCYNIQACTSXEIg0lAAJNKcgmDSkAAk0tzCYNLQACTTHQJg0xAAJNNdgmDTUAAk053BINOQACTT3eBQINPQGCTUXRgg1FAAJNUeWCDVEAAk1Z5MINWQACTUXkYg1FAAJNUeXiDVEAAk0NsBYNDQACTRGwHg0RAAJNFbAmDRUAAk0ZtCYNGQACTR24Jg0dAAJNIcAmDSEAAk0lxCINJQACTSnIJg0pAAJNLcwmDS0AAk0x0CYNMQACTTXYJg01AAJNOdwSDTkAAk093MINPQACTUXcwg1FAAJNUdzCDVEAAk1Z3MINWQACTWHcwg1hAAJNRdxiDUUAAk1R3SINUQACTVncYg1ZAAJNYd4FYg1hAYJNFbAWDRUAAk0ZsB4NGQACTR2wJg0dAAJNIbQmDSEAAk0luCYNJQACTSnAJg0pAAJNLcQiDS0AAk0xyCYNMQACTTXMJg01AAJNOdAmDTkAAk092CYNPQACTUHcEg1BAAJNRd4FAg1FAYJNUdzCDVEAAk1Z3GINWQACTUXeBWINRQACTT3dgg09AAJNFbAWDRUAAk0ZsB4NGQACTR2wJg0dAAJNIbQmDSEAAk0luCYNJQACTSnAJg0pAAJNLcQiDS0AAk0xyCYNMQACTTXMJg01AAJNOdAmDTkAAk092CYNPQACTUHcEg1BAAJNRd4FAg1FAhECzZQAAs2QAALMGDACzCkAAswdkAOMAQAKzZQAAs2QAALMGDACzCkAAswdkAOMAQACzZQAAs2QAALMGDACzCkAAswdkAOMAQAD/LwA=";
-	// useful base64-encoder:
-	// http://www.opinionatedgeek.com/dotnet/tools/base64encode/
 	data = atob(data);
 	midi = new Midi(data);
 	mixer = new Mixer();
-	/*
 	midi.add_callback(function(e) {
 		mixer.handle_event(e);
 	});
-	*/
-	/*
-	midi.add_callback(function(e) {
-		if (e.type == 0x9) {
-			cubes[e.note_number].setGoalPosition(
-					cubes[e.note_number].mesh.position.x, e.velocity / 10,
-					cubes[e.note_number].mesh.position.z, 0);
-			cubes[e.note_number].setGoalColor(COLORS[e.midi_channel].r,
-					COLORS[e.midi_channel].g, COLORS[e.midi_channel].b, 0);
-		} else if (e.type == 0x8) {
-			cubes[e.note_number].setGoalPosition(
-					cubes[e.note_number].mesh.position.x, 0,
-					cubes[e.note_number].mesh.position.z, FRAME_LENGTH * 5);
-			cubes[e.note_number].setGoalColor(1, 1, 1, FRAME_LENGTH * 5);
-		}
-	});
-	*/
 	camera = new THREE.PerspectiveCamera(45, 16 / 9, 0.1, 10000);
 	camera.position.y = 220;
 
-	//renderer.shadowMapEnabled = true;
 	scene = new THREE.Scene();
 	scene.add(camera);
 	cubes = [];
 	side = 32;
+
 	x_spacing = 5 + 2.545 + 0.5;
 	z_spacing = 4.363 * 2 + 0.5;
-	materials = [
-	    new THREE.MeshLambertMaterial({color:0xE8B86F}),
-	    new THREE.MeshLambertMaterial({color:0xFFBD0D}),
-	    new THREE.MeshLambertMaterial({color:0xFF7F00}),
-	    new THREE.MeshLambertMaterial({color:0xE85700}),
-	    new THREE.MeshLambertMaterial({color:0x4A0808})
-    ];
-    
+
+	materials = [ new THREE.MeshLambertMaterial({
+		color : 0xE8B86F
+	}), new THREE.MeshLambertMaterial({
+		color : 0xFFBD0D
+	}), new THREE.MeshLambertMaterial({
+		color : 0xFF7F00
+	}), new THREE.MeshLambertMaterial({
+		color : 0xE85700
+	}), new THREE.MeshLambertMaterial({
+		color : 0x4A0808
+	}) ];
+
 	geometry = createHexagonGeometry(10, -10);
 	for ( var i = 0; i < side; i++) {
 		for ( var j = 0; j < side; j++) {
@@ -140,7 +84,7 @@ function init() {
 			scene.add(cubes[i * side + j].mesh);
 		}
 	}
-	light = new THREE.SpotLight();//new THREE.SpotLight(0xF88808);
+	light = new THREE.SpotLight();
 	light.intensity = 0.5;
 	scene.add(light);
 
@@ -148,182 +92,31 @@ function init() {
 	lyte = new Lyte(0, 40, 0);
 }
 
-	
 function Hexagon(x, y, z) {
-	this.held = false;
 	this.mesh = new THREE.Mesh(geometry, materials[0]);
 	this.mesh.position.x = x;
 	this.mesh.position.y = y;
 	this.mesh.position.z = z;
-	this.mesh.castShadow = true;
-	this.mesh.receiveShadow = true;
-	/*
-	this.goalColor = {
-		r : 1,
-		g : 1,
-		b : 1
-	};
-	*/
-	this.startColor = {
-		r : 1,
-		g : 1,
-		b : 1
-	};
-	this.startColorTime = 0;
-	this.goalColorTime = 0;
-	this.goalPosition = {
-		x : x,
-		y : y,
-		z : z
-	};
-	this.startPosition = {
-		x : 1,
-		y : 1,
-		z : 1
-	};
-	this.startPositionTime = 0;
-	this.goalPositionTime = 0;
-	this.goalRotation = {
-		x : 0,
-		y : 0,
-		z : 0
-	};
-	this.startRotation = {
-		x : 0,
-		y : 0,
-		z : 0
-	};
-	this.startRotationTime = 0;
-	this.goalRotationTime = 0;
 }
 
-/*
-Hexagon.prototype.setGoalColor = function(r, g, b, goalTime, flags) {
-	if ((flags & NO_OVERRIDE) && t < this.goalColorTime)
-		return;
-	this.startColor = (flags & FINISH_PREVIOUS) ? this.goalColor
-			: this.mesh.color;
-	this.startColor = this.mesh.material.color;
-	this.goalColor.r = r;
-	this.goalColor.g = g;
-	this.goalColor.b = b;
-	this.startColorTime = t;
-	this.goalColorTime = t + goalTime;
-}
-*/
 
-Hexagon.prototype.setGoalPosition = function(x, y, z, goalTime, flags) {
-	if ((flags & NO_OVERRIDE) && t < this.goalPositionTime)
-		return;
-	this.startPosition = (flags & FINISH_PREVIOUS) ? this.goalPosition
-			: this.mesh.position;
-	this.goalPosition.x = x;
-	this.goalPosition.y = y;
-	this.goalPosition.z = z;
-	this.startPositionTime = t;
-	this.goalPositionTime = t + goalTime;
-}
-
-Hexagon.prototype.setGoalRotation = function(goalRotation, flags) {
-	if ((flags & NO_OVERRIDE) && t < this.goalRotationTime)
-		return;
-	this.startRotation = (flags & FINISH_PREVIOUS) ? this.goalRotation
-			: this.mesh.rotation;
-	this.startRotation = this.mesh.rotation;
-	this.goalRotation = goalRotation;
-	this.startRotationTime = t;
-	this.goalRotationTime = t + goalTime;
-}
-
-Hexagon.prototype.punch = function(r, g, b) {
-	this.mesh.material = materials[(r*materials.length)|0];
-	this.mesh.position.y = 10*r;
-}
-
-Hexagon.prototype.hold = function(r, g, b) {
-	this.mesh.material.color.r = r;
-	this.mesh.material.color.g = g;
-	this.mesh.material.color.b = b;
-	this.held = true;
-}
-
-Hexagon.prototype.release = function() {
-	this.held = false;
+Hexagon.prototype.punch = function(height) {
+	//this.mesh.material = materials[(height * materials.length) | 0];
+	this.mesh.position.y = 10 * height;
 }
 
 Hexagon.prototype.update = function() {
-
-	/* interpolate color */
-	/*
-	if (this.goalColor.r != this.mesh.material.color.r
-			|| this.goalColor.g != this.mesh.material.color.g
-			|| this.goalColor.b != this.mesh.material.color.b) {
-		if (t > this.goalColorTime) {
-			this.mesh.material.color.r = this.goalColor.r;
-			this.mesh.material.color.g = this.goalColor.g;
-			this.mesh.material.color.b = this.goalColor.b;
-		} else {
-			this.mesh.material.color.r = smoothstep(this.goalColor.r,
-					this.startColor.r, (this.goalColorTime - t)
-							/ (this.goalColorTime - this.startColorTime));
-			this.mesh.material.color.g = smoothstep(this.goalColor.g,
-					this.startColor.g, (this.goalColorTime - t)
-							/ (this.goalColorTime - this.startColorTime));
-			this.mesh.material.color.b = smoothstep(this.goalColor.b,
-					this.startColor.b, (this.goalColorTime - t)
-							/ (this.goalColorTime - this.startColorTime));
-		}
+	if(this.mesh.position.y > 0){
+		this.mesh.position.y -= 1;
+	}else if(this.mesh.position.y < 0){
+		this.mesh.position.y=0;
 	}
-
-*/
-	/* interpolate position */
-	if (this.goalPosition.x != this.mesh.position.x
-			|| this.goalPosition.y != this.mesh.position.y
-			|| this.goalPosition.z != this.mesh.position.z) {
-		if (t >= this.goalPositionTime) {
-			this.mesh.position.x = this.goalPosition.x;
-			this.mesh.position.y = this.goalPosition.y;
-			this.mesh.position.z = this.goalPosition.z;
-		} else {
-			this.mesh.position.x = smoothstep(this.goalPosition.x,
-					this.startPosition.x, (this.goalPositionTime - t)
-							/ (this.goalPositionTime - this.startPositionTime));
-			this.mesh.position.y = smoothstep(this.goalPosition.y,
-					this.startPosition.y, (this.goalPositionTime - t)
-							/ (this.goalPositionTime - this.startPositionTime));
-			this.mesh.position.z = smoothstep(this.goalPosition.z,
-					this.startPosition.z, (this.goalPositionTime - t)
-							/ (this.goalPositionTime - this.startPositionTime));
-		}
-	}
-
-	/* interpolate rotation */
-	if (this.goalRotation.x != this.mesh.rotation.x
-			|| this.goalRotation.y != this.mesh.rotation.y
-			|| this.goalRotation.z != this.mesh.rotation.z) {
-		if (t > this.goalRotationTime) {
-			this.mesh.rotation.x = this.goalRotation.x;
-			this.mesh.rotation.y = this.goalRotation.y;
-			this.mesh.rotation.z = this.goalRotation.z;
-		} else {
-			this.mesh.rotation.x = smoothstep(this.goalRotation.x,
-					this.startRotation.x, (this.goalRotationTime - t)
-							/ (this.goalRotationTime - this.startRotationTime));
-			this.mesh.rotation.y = smoothstep(this.goalRotation.y,
-					this.startRotation.y, (this.goalRotationTime - t)
-							/ (this.goalRotationTime - this.startRotationTime));
-			this.mesh.rotation.z = smoothstep(this.goalRotation.z,
-					this.startRotation.z, (this.goalRotationTime - t)
-							/ (this.goalRotationTime - this.startRotationTime));
-		}
-	}
-	this.mesh.material = materials[(this.mesh.position.y/10*materials.length)|0];
+	//this.mesh.material = materials[(this.mesh.position.y / 10 * materials.length) | 0];
 }
 
 function createHexagonGeometry(hy, ly) {
 	var geometry = new THREE.Geometry();
 
-	/* Hexagon geometry from zynaps.com */
 	geometry.vertices.push(new THREE.Vector3(-5.000, hy, 0));
 	geometry.vertices.push(new THREE.Vector3(-2.545, hy, -4.363));
 	geometry.vertices.push(new THREE.Vector3(2.545, hy, -4.363));
@@ -415,17 +208,6 @@ function Kewbe() {
 		x : 0,
 		y : 0
 	}, ];
-
-	this.camera = {
-		x : 0,
-		y : 0,
-		z : 250,
-	};
-	this.viewer = {
-		x : 0,
-		y : 0,
-		z : -300
-	};
 }
 
 Kewbe.prototype.update = function() {
@@ -478,16 +260,9 @@ Kewbe.prototype.rotate = function(args) {
 
 Kewbe.prototype.render = function() {
 	for ( var i = 0; i < this.points.length; i++) {
-
-		var d = {
-			x : this.points[i].x - this.camera.x,
-			y : Math.cos(this.camera.x) * (this.points[i].y - this.camera.y),
-			z : this.points[i].z - this.camera.z - Math.sin(this.camera.x)
-					* (this.points[i].y - this.camera.y)
-		};
-
-		this.flat[i].x = (d.x - this.viewer.x) * (this.viewer.z / d.z);
-		this.flat[i].y = (d.y - this.viewer.y) * (this.viewer.z / d.z);
+		var multiplier = -300 / (this.points[i].z - 250);
+		this.flat[i].x = this.points[i].x * multiplier;
+		this.flat[i].y = this.points[i].y * multiplier;
 
 		this.flat[i].hexx = (0 | (side * (this.scaler + this.flat[i].x) / (2 * this.scaler)));
 		this.flat[i].hexy = (0 | (side * (this.scaler + this.flat[i].y) / (2 * this.scaler)));
@@ -513,12 +288,11 @@ function Lyte(x, y, z) {
 	this.planes = [];
 	this.w = 40;
 	this.h = 4;
+
 	this.x = +(x || 0);
 	this.y = +(y || 0);
 	this.z = +(z || 0);
-	this.dx = 0;
-	this.dy = 0;
-	this.dz = 0;
+
 	this.number_of_planes = 6;
 	this.number_of_rays = 3;
 	this.rotation = new THREE.Vector3(0, 0, 0);
@@ -573,7 +347,8 @@ function Lyte(x, y, z) {
 	this.rays[2].rotation.z = Math.PI / 2;
 
 	this.ballGeometry = new THREE.SphereGeometry(this.h / 2, 32, 16);
-	this.ball = new THREE.Mesh(this.ballGeometry,new THREE.MeshBasicMaterial(0xFFFFFF));
+	this.ball = new THREE.Mesh(this.ballGeometry, new THREE.MeshBasicMaterial(
+			0xFFFFFF));
 	this.lyte.add(this.ball);
 
 	var cube_geometry = new THREE.CubeGeometry(this.h * 2, this.h * 2,
@@ -597,12 +372,8 @@ function Lyte(x, y, z) {
 	lyte_shell = subtract_bsp.subtract(ring_bsp);
 	var lyte_shell_g = lyte_shell.toGeometry();
 
-	// this.lyte.add(ring_bsp.toMesh(new THREE.MeshNormalMaterial()));
-	this.lyte.add(new THREE.Mesh(lyte_shell_g,new THREE.MeshLambertMaterial(0xCCCCCC)));
-	// this.lyte.add(new THREE.Mesh(new
-	// THREE.CubeGeometry(this.h*2,this.h*2,this.h*2), new
-	// THREE.MeshLambertMaterial({color:0xFFFFFF})));
-
+	this.lyte.add(new THREE.Mesh(lyte_shell_g, new THREE.MeshLambertMaterial(
+			0xCCCCCC)));
 	scene.add(this.lyte);
 }
 
@@ -629,11 +400,9 @@ Lyte.prototype.update = function() {
 
 	this.setIntensity(1 - (t % samples_per_quaver) / samples_per_quaver);
 
-	this.x += this.dx;
-	this.y += this.dy;
-	this.z += this.dz;
-
-	this.lyte.position.set(this.x, this.y, this.z);
+	this.lyte.position.x = Math.sin(t / (20000)) * side * 2;
+	this.lyte.position.y = this.y;
+	this.lyte.position.z = Math.cos(t / (20000)) * side * 2;
 
 	this.lyte.rotation.x += 0.017 * 2;
 	this.lyte.rotation.z += 0.019 * 2;
@@ -649,8 +418,8 @@ Lyte.prototype.render = function() {
 }
 
 Lyte.prototype.get_texture = function(w, h, count) {
-	return Lyte.prototype._texture = Lyte.prototype._texture
-			|| (function() {
+	return Lyte.prototype._texture = Lyte.prototype._texture ||
+			   (function() {
 				var canvas = document.createElement("canvas");
 				canvas.width = w;
 				canvas.height = h;
@@ -660,17 +429,14 @@ Lyte.prototype.get_texture = function(w, h, count) {
 				var d = imgdata.data;
 				var x = 0, y = 0;
 				for ( var i = 0; i < d.length; i += 4) {
-
 					d[i] = 255;
 					d[i + 1] = 255;
 					d[i + 2] = 192;
-					d[i + 3] = (255
-							* ((canvas.height - (y + 1)) / canvas.height)
-							* (canvas.width - Math.abs(canvas.width - 2
-									* (1 + x))) / canvas.width)
+					d[i + 3] = (255 * ((h - (y + 1)) / h)
+							* (w - Math.abs(w - 2 * (1 + x))) / w)
 							/ count;
 					x++;
-					if (x >= canvas.width) {
+					if (x >= w) {
 						x = 0;
 						y++;
 					}
