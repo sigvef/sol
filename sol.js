@@ -2,8 +2,9 @@ DEBUG = false;
 ORIGO = new THREE.Vector3(0, 0, 0);
 
 //STIAJE = {data:"RBYDXCDBCDCCBCBCBCBCBEJBCBCBCBCBCBCBCCCBCBCBCBCBCBCDEBCBCBFBCBDBDCDBCBCBCBCBCCCBBBDECBCEICFBFBCCDCBFDDBDCF",w:25,h:11};
-STIAJE = {data:"RBYDXCDBCDCCBCBCBCBCBJBCBCBCBCBCBCBCCCBCBCBCBCBCBDCEBCBCBFBCBDBDCDBCBCBCBCBCCCBCBDECBCEICFBFBCCDCBFDDBDCF",w:25,h:11};
 STIAJE = {data:"RBYDXCDBCDCCBCBCBCBCBJBCBCBCBCBCBCBCCCBCBCBCBCBCBDCEBCBCBFBCBDBDCDBCBCBCBCBCCCBBBDECBCEICFBFBCCDCBFDDBDCF",w:25,h:11};
+IVERJO= {data:"TB\\D[CLBFBDBBCBCDBCCBFBEBCBCBCBHBCBCBCBBBCBCBCBCBEBCBCBDCCBCBCBCBEBCBCBDCECCBCBEBCBCBCDCBCECBEBCBCBEBCBCBCBHBCBCCDBFBCCDRBL",w:28,h:12};
+
 
 /* smoothstep interpolaties between a and b, at time t from 0 to 1 */
 function smoothstep(a, b, t) {
@@ -22,7 +23,7 @@ function drawImage(img,startx,starty){
 	for(var i=0;i<img.data.length;i++){
 		var num = img.data.charCodeAt(i)-65;
 		while(num-->0){
-			cubes[(side-x-1)*side+y].mesh.position.y = on?30:0;
+			cubes[(side-x-1)*side+y].mesh.position.y = on?25+5*Math.sin(x/4+t/4000):0;
 			cubes[(side-x-1)*side+y].mesh.material = materials[+on*2];
 			x++;
 			if(x>startx+img.w){
@@ -49,6 +50,8 @@ function update() {
 		cubes[i].update();
 	}
 	*/
+	drawImage(STIAJE,2,15);
+	drawImage(IVERJO,2,1);
 
 	//kewbe.update();
 	lyte.update();
@@ -116,7 +119,6 @@ function init() {
 
 	kewbe = new Kewbe();
 	lyte = new Lyte(0, 40, 0);
-	drawImage(STIAJE,2,10);
 }
 
 function Hexagon(x, y, z) {
