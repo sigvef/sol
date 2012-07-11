@@ -1,6 +1,10 @@
 DEBUG = false;
 ORIGO = new THREE.Vector3(0, 0, 0);
 
+//STIAJE = {data:"RBYDXCDBCDCCBCBCBCBCBEJBCBCBCBCBCBCBCCCBCBCBCBCBCBCDEBCBCBFBCBDBDCDBCBCBCBCBCCCBBBDECBCEICFBFBCCDCBFDDBDCF",w:25,h:11};
+STIAJE = {data:"RBYDXCDBCDCCBCBCBCBCBJBCBCBCBCBCBCBCCCBCBCBCBCBCBDCEBCBCBFBCBDBDCDBCBCBCBCBCCCBCBDECBCEICFBFBCCDCBFDDBDCF",w:25,h:11};
+STIAJE = {data:"RBYDXCDBCDCCBCBCBCBCBJBCBCBCBCBCBCBCCCBCBCBCBCBCBDCEBCBCBFBCBDBDCDBCBCBCBCBCCCBBBDECBCEICFBFBCCDCBFDDBDCF",w:25,h:11};
+
 /* smoothstep interpolaties between a and b, at time t from 0 to 1 */
 function smoothstep(a, b, t) {
 	var v = t * t * (3 - 2 * t);
@@ -11,26 +15,48 @@ function lerp(a, b, t) {
 	return b * t + a * (1 - t);
 }
 
-function update() {
+function drawImage(img,startx,starty){
+	var x = startx+1;
+	var y = starty;
+	var on = false;
+	for(var i=0;i<img.data.length;i++){
+		var num = img.data.charCodeAt(i)-65;
+		while(num-->0){
+			cubes[(side-x-1)*side+y].mesh.position.y = on?30:0;
+			cubes[(side-x-1)*side+y].mesh.material = materials[+on*2];
+			x++;
+			if(x>startx+img.w){
+				x = startx+1;
+				y++;
+			}
+		}
+		on = !on;
+	}
+}
 
+function update() {
+	
 	camera.position.x = lyte.x + Math.sin(t / 44100) * side * 8;
 	camera.position.z = lyte.z + Math.cos(t / 44100) * side * 8;
+	
 	light.position.x = -camera.position.x;
 	light.position.y = camera.position.y;
 	light.position.z = -camera.position.z;
 
 	var samples_per_quaver = midi.ticks_per_beat / midi.ticks_per_second * 44100;
+	/*
 	for ( var i = 0; i < side * side; i++) {
 		cubes[i].update();
 	}
+	*/
 
-	kewbe.update();
+	//kewbe.update();
 	lyte.update();
 }
 
 function render() {
 	camera.lookAt(ORIGO);
-	kewbe.render();
+	//kewbe.render();
 	renderer.render(scene, camera);
 }
 
@@ -90,6 +116,7 @@ function init() {
 
 	kewbe = new Kewbe();
 	lyte = new Lyte(0, 40, 0);
+	drawImage(STIAJE,2,10);
 }
 
 function Hexagon(x, y, z) {
