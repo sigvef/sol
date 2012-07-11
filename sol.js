@@ -3,6 +3,7 @@ FINISH_PREVIOUS = 2;
 DEBUG = false;
 ORIGO = new THREE.Vector3(0, 0, 0);
 
+
 /* smoothstep interpolaties between a and b, at time t from 0 to 1 */
 function smoothstep(a, b, t) {
 	var v = t * t * (3 - 2 * t);
@@ -18,8 +19,10 @@ analyserData = new Uint8Array(256);
 function update() {
 
 	mixer.analyser.getByteFrequencyData(analyserData);
-	camera.position.x = Math.sin(t / (200 * 2205)) * side * 8;
-	camera.position.z = Math.cos(t / (200 * 2205)) * side * 8;
+	lyte.x = Math.sin(t / (20000)) * side * 2;
+	lyte.z = Math.cos(t / (20000)) * side * 2;
+	camera.position.x = lyte.x+Math.sin(t / (20 * 2205)) * side * 8;
+	camera.position.z = lyte.z+Math.cos(t / (20 * 2205)) * side * 8;
 	light.position.x = -camera.position.x;
 	light.position.y = camera.position.y;
 	light.position.z = -camera.position.z;
@@ -30,25 +33,24 @@ function update() {
 		if (t > 2112512) {
 			cubes[i].setGoalPosition(i * Math.sin(i / 1000000 * t), 0, i
 					* Math.cos(i / 1000000 * t), samples_per_hemiquaver * 2,
-					FINISH_PREVIOUS);
+					NO_OVERRIDE);
 		}
 		cubes[i].update();
 	}
 
-	camera.lookAt(ORIGO);
 
 	kewbe.update();
 	lyte.update();
 }
 
 function render() {
-	if (t > 3500 * 2205) {
+	/*
 		camera.position.y = Math.sin((t - 3500 * 2205) / (300 * 2205)) * 500;
 		camera.position.x = Math.sin((t - 3500 * 2205) / (100 * 2205)) * 200;
 		camera.position.z = Math.cos((t - 3500 * 2205) / (100 * 2205)) * 200;
+		*/
 		camera.lookAt(ORIGO);
 		kewbe.render();
-	}
 	renderer.render(scene, camera);
 }
 
@@ -91,9 +93,12 @@ function init() {
 	data = atob(data);
 	midi = new Midi(data);
 	mixer = new Mixer();
+	/*
 	midi.add_callback(function(e) {
 		mixer.handle_event(e);
 	});
+	*/
+	/*
 	midi.add_callback(function(e) {
 		if (e.type == 0x9) {
 			cubes[e.note_number].setGoalPosition(
@@ -108,16 +113,25 @@ function init() {
 			cubes[e.note_number].setGoalColor(1, 1, 1, FRAME_LENGTH * 5);
 		}
 	});
+	*/
 	camera = new THREE.PerspectiveCamera(45, 16 / 9, 0.1, 10000);
-	camera.position.y = 120;
+	camera.position.y = 220;
 
-	renderer.shadowMapEnabled = true;
+	//renderer.shadowMapEnabled = true;
 	scene = new THREE.Scene();
 	scene.add(camera);
 	cubes = [];
-	side = 12;
+	side = 32;
 	x_spacing = 5 + 2.545 + 0.5;
 	z_spacing = 4.363 * 2 + 0.5;
+	materials = [
+	    new THREE.MeshLambertMaterial({color:0xE8B86F}),
+	    new THREE.MeshLambertMaterial({color:0xFFBD0D}),
+	    new THREE.MeshLambertMaterial({color:0xFF7F00}),
+	    new THREE.MeshLambertMaterial({color:0xE85700}),
+	    new THREE.MeshLambertMaterial({color:0x4A0808})
+    ];
+    
 	geometry = createHexagonGeometry(10, -10);
 	for ( var i = 0; i < side; i++) {
 		for ( var j = 0; j < side; j++) {
@@ -126,7 +140,7 @@ function init() {
 			scene.add(cubes[i * side + j].mesh);
 		}
 	}
-	light = new THREE.SpotLight(0xF88808);
+	light = new THREE.SpotLight();//new THREE.SpotLight(0xF88808);
 	light.intensity = 0.5;
 	scene.add(light);
 
@@ -134,22 +148,22 @@ function init() {
 	lyte = new Lyte(0, 40, 0);
 }
 
+	
 function Hexagon(x, y, z) {
 	this.held = false;
-	var material = new THREE.MeshLambertMaterial({
-		color : 0xFFFFFF
-	});
-	this.mesh = new THREE.Mesh(geometry, material);
+	this.mesh = new THREE.Mesh(geometry, materials[0]);
 	this.mesh.position.x = x;
 	this.mesh.position.y = y;
 	this.mesh.position.z = z;
 	this.mesh.castShadow = true;
 	this.mesh.receiveShadow = true;
+	/*
 	this.goalColor = {
 		r : 1,
 		g : 1,
 		b : 1
 	};
+	*/
 	this.startColor = {
 		r : 1,
 		g : 1,
@@ -183,6 +197,7 @@ function Hexagon(x, y, z) {
 	this.goalRotationTime = 0;
 }
 
+/*
 Hexagon.prototype.setGoalColor = function(r, g, b, goalTime, flags) {
 	if ((flags & NO_OVERRIDE) && t < this.goalColorTime)
 		return;
@@ -195,6 +210,7 @@ Hexagon.prototype.setGoalColor = function(r, g, b, goalTime, flags) {
 	this.startColorTime = t;
 	this.goalColorTime = t + goalTime;
 }
+*/
 
 Hexagon.prototype.setGoalPosition = function(x, y, z, goalTime, flags) {
 	if ((flags & NO_OVERRIDE) && t < this.goalPositionTime)
@@ -220,11 +236,8 @@ Hexagon.prototype.setGoalRotation = function(goalRotation, flags) {
 }
 
 Hexagon.prototype.punch = function(r, g, b) {
-	if (!this.held) {
-		this.mesh.material.color.r = r;
-		this.mesh.material.color.g = g;
-		this.mesh.material.color.b = b;
-	}
+	this.mesh.material = materials[(r*materials.length)|0];
+	this.mesh.position.y = 10*r;
 }
 
 Hexagon.prototype.hold = function(r, g, b) {
@@ -241,6 +254,7 @@ Hexagon.prototype.release = function() {
 Hexagon.prototype.update = function() {
 
 	/* interpolate color */
+	/*
 	if (this.goalColor.r != this.mesh.material.color.r
 			|| this.goalColor.g != this.mesh.material.color.g
 			|| this.goalColor.b != this.mesh.material.color.b) {
@@ -261,6 +275,7 @@ Hexagon.prototype.update = function() {
 		}
 	}
 
+*/
 	/* interpolate position */
 	if (this.goalPosition.x != this.mesh.position.x
 			|| this.goalPosition.y != this.mesh.position.y
@@ -302,6 +317,7 @@ Hexagon.prototype.update = function() {
 							/ (this.goalRotationTime - this.startRotationTime));
 		}
 	}
+	this.mesh.material = materials[(this.mesh.position.y/10*materials.length)|0];
 }
 
 function createHexagonGeometry(hy, ly) {
@@ -557,9 +573,7 @@ function Lyte(x, y, z) {
 	this.rays[2].rotation.z = Math.PI / 2;
 
 	this.ballGeometry = new THREE.SphereGeometry(this.h / 2, 32, 16);
-	this.ball = new THREE.Mesh(this.ballGeometry, new THREE.MeshBasicMaterial({
-		color : 0xFFFFFF
-	}));
+	this.ball = new THREE.Mesh(this.ballGeometry,new THREE.MeshBasicMaterial(0xFFFFFF));
 	this.lyte.add(this.ball);
 
 	var cube_geometry = new THREE.CubeGeometry(this.h * 2, this.h * 2,
@@ -580,10 +594,11 @@ function Lyte(x, y, z) {
 
 	var subtract_bsp = cube_bsp.subtract(sphere_bsp);
 
-	var lyte_shell = subtract_bsp.subtract(ring_bsp);
+	lyte_shell = subtract_bsp.subtract(ring_bsp);
+	var lyte_shell_g = lyte_shell.toGeometry();
 
 	// this.lyte.add(ring_bsp.toMesh(new THREE.MeshNormalMaterial()));
-	this.lyte.add(lyte_shell.toMesh(new THREE.MeshLambertMaterial()));
+	this.lyte.add(new THREE.Mesh(lyte_shell_g,new THREE.MeshLambertMaterial(0xCCCCCC)));
 	// this.lyte.add(new THREE.Mesh(new
 	// THREE.CubeGeometry(this.h*2,this.h*2,this.h*2), new
 	// THREE.MeshLambertMaterial({color:0xFFFFFF})));
