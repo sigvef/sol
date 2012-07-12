@@ -9,6 +9,7 @@ function Mixer(){
     var that = this;
     this.jsnode.onaudioprocess = function(e){that.process(e);};
 
+    //midi.play_forward(25000); //Just for testing: skip ahead in the song.
     this.process = function(e){
 
         var datal = e.outputBuffer.getChannelData(0);
@@ -189,7 +190,6 @@ function instruments(instrument) {
 		    return this.out;
 		};
 	case 1:
-	case 3:
 		return function(t) {	//Saw
 			this.out = 0;
 			for(var i=0;i<this.num_active_notes;i++){
@@ -198,7 +198,7 @@ function instruments(instrument) {
 		    		if (!this.amplitude) continue;
 		    	}
 				this.out += this.amplitude*A*this.note_pool[i].velocity*saw(
-						(note2freq[this.note_pool[i].note_number]*t*128*RATE_RECIPROCAL));
+						note2freq[this.note_pool[i].note_number]*t*128*RATE_RECIPROCAL);
 			};
 			return this.out;
 	};
@@ -206,14 +206,35 @@ function instruments(instrument) {
 		return function(t) {	//Sine
 			this.out = 0;
 			for(var i=0;i<this.num_active_notes;i++){
-		    	if (true) {
-		    		this.amplitude = this.envelope(i);
-		    		if (!this.amplitude) continue;
-		    	}
+	    		this.amplitude = this.envelope(i);
+	    		if (!this.amplitude) continue;
 				this.out += this.amplitude*A*this.note_pool[i].velocity*sin(
 						(note2freq[this.note_pool[i].note_number]*t*128*RATE_RECIPROCAL));
 			};
 			
+			return this.out;
+	};
+	case 3:
+		return function(t) {	//Noisy saw with chorus, vibrato and octaver
+			this.out = 0;
+			for(var i=0;i<this.num_active_notes;i++){
+		    	if (play_forward_trigger%22==0) {
+		    		this.amplitude = this.envelope(i);
+		    		if (!this.amplitude) continue;
+		    	}
+		    	var tSinceStart = t-this.note_pool[i].tStarted;
+		    	var frequency = note2freq[this.note_pool[i].note_number] * (t*128*RATE_RECIPROCAL + Math.max(0,Math.min(0.1, tSinceStart*0.0000013-0.01))*sin(t*1100*RATE_RECIPROCAL));
+				this.out += this.amplitude*A*this.note_pool[i].velocity*(
+						(Math.random()-0.5)*0.21
+						+ 0.43*saw(frequency)
+						+ 0.22*saw(2*frequency)
+						+ 0.22*saw(0.5*frequency)
+						+ 0.43*saw(0.99726*frequency)
+						+ 0.43*saw(1.01225*frequency)
+						+ 0.43*saw(0.98249*frequency)
+						+ 0.43*saw(1.02123*frequency)
+					);
+			};
 			return this.out;
 	};
 	case 4:
