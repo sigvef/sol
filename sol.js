@@ -2,6 +2,13 @@ DEBUG = false;
 ORIGO = new THREE.Vector3(0, 0, 0);
 cameraMovementDone = true;
 
+TEXTS = [
+        "HONEYCOMB BY NINJADEV",
+        "(OUR FIRST DEMO :3)",
+        "WE MADE THE SYNTH OURSELVES :D",
+        "KEEP UP THE GOOD FUN @ SOLSKOGEN 2012"
+         ];
+
 STIAJE = {data:"RBYDXCDBCDCCBCBCBCBCBJBCBCBCBCBCBCBCCCBCBCBCBCBCBDCEBCBCBFBCBDBDCDBCBCBCBCBCCCBBBDECBCEICFBFBCCDCBFDDBDCF",w:25,h:11};
 IVERJO= {data:"TB\\D[CLBFBDBBCBCDBCCBFBEBCBCBCBHBCBCBCBBBCBCBCBCBEBCBCBDCCBCBCBCBEBCBCBDCECCBCBEBCBCBCDCBCECBEBCBCBEBCBCBCBHBCBCCDBFBCCDRBL",w:28,h:12};
 
@@ -23,7 +30,7 @@ function drawImage(img,startx,starty){
 	for(var i=0;i<img.data.length;i++){
 		var num = img.data.charCodeAt(i)-65;
 		while(num-->0){
-			cubes[(side-x-1)*side+y].mesh.position.y = on?25+5*Math.sin(x/4+t/4000):0;
+			if(on) cubes[(side-x-1)*side+y].mesh.position.y = 25+5*Math.sin(x/4+t/4000);
 			cubes[(side-x-1)*side+y].mesh.material = materials[+on];
 			x++;
 			if(x>startx+img.w){
@@ -79,33 +86,6 @@ function deepCopy3DObject(from, to){
 }
 
 function update() {
-	
-	/*
-	camera.position.x = lyte.x + Math.sin(t / 44100) * side * 8;
-	camera.position.z = lyte.z + Math.cos(t / 44100) * side * 8;
-	*/
-	
-	/* update particle system */
-	/*
-	for(var i=0;i<num_particles;i++){
-		p = particles.vertices[i];
-		nextp = particles.vertices[(i+1)%num_particles];
-		
-		p.dx += nextp.x-p.x<0?-0.1:0.1;
-		p.dy += nextp.y-p.y<0?-0.1:0.1;
-		p.dz += nextp.z-p.z<0?-0.1:0.1;
-		
-		p.dx = Math.max(-3, Math.min(p.dx+nextp.dx, 3));
-		p.dy = Math.max(-3, Math.min(p.dy+nextp.dy, 3));
-		p.dz = Math.max(-3, Math.min(p.dz+nextp.dz, 3));
-		
-		p.x += p.dx;
-		p.y += p.dy;
-		p.z += p.dz;
-	}
-	particles.verticesNeedUpdate = true;
-	*/
-	
 	/* interpolate camera movement */
 	if(!cameraMovementDone){
 		var interpolt = (t-startcamera.time)/(goalcamera.time-startcamera.time);
@@ -123,26 +103,94 @@ function update() {
 		}
 	}
 	
+	/* set the position of the global ambient light */
 	light.position.x = -camera.position.x;
 	light.position.y = camera.position.y;
 	light.position.z = -camera.position.z;
 
-	var samples_per_quaver = midi.ticks_per_beat / midi.ticks_per_second * 44100;
-	for ( var i = 0; i < side * side; i++) {
-		cubes[i].update();
+	if(t>1500000){
+		updateHexagonGrid();
+		kewbe.update();
+		osd.update();
+		lyte.update();
+		if(cameratarget != ORIGO) cameratarget = ORIGO;
+	}else if(t > 300000 && t< 1500000){
+		updateHexagonGrid();
+		lyte.update();
+		osd.update();
+		//drawImage(STIAJE, 2, 15);
+		if(cameratarget != lyte.lyte.position) cameratarget = lyte.lyte.position;
+	}else{
+		updateHexagonGrid();
+		lyte.update();
+		osd.update();
+		if(cameratarget != ORIGO) cameratarget = ORIGO;
 	}
-	/*
-	drawImage(STIAJE,2,15);
-	drawImage(IVERJO,2,1);
-	*/
+	
 
-	//t<2000000?drawImage(STIAJE,2,15):kewbe.update();
-	lyte.update();
 }
 
 
+function updateHexagonGrid(){
+	for ( var i = 0; i < side * side; i++) {
+		cubes[i].update();
+	}
+	
+	/* waves */
+	var timeoffset = t/10000;
+	for(var x=0;x<side;x++){
+		for(var y=0;y<side;y++){
+			cubes[x*side+y].mesh.position.y= 10*+(Math.sin(timeoffset+x/3) + Math.cos(timeoffset+y/5)); 
+		}
+	}
+}
+
+function OSD(){
+	this.text = "Honeycomb by Ninjadev";
+	this.boxstart = GU;
+	this.boxwidth = 4*GU;
+	this.t = 0;
+	this.textlength = 0;
+	this.opacity = 1;
+	this.idealtextlength = 21;
+}
+
+OSD.prototype.render = function(){
+	tdx.fillStyle = "rgba(0,0,0,"+(this.opacity/2)+")";
+	tdx.fillRect(this.boxstart, 7*GU, this.boxwidth*Math.sqrt(this.text.length/this.idealtextlength), GU);
+	tdx.fillStyle = "rgba(255,255,255,"+this.opacity+")";
+	tdx.fillText(this.text.substring(0, this.textlength),this.boxstart+.25*GU, 7.25*GU);
+}
+
+OSD.prototype.show = function(text){
+	this.text = text;
+	this.t = 0;
+	this.boxstart = GU;
+	this.boxwidth = 4*GU;
+	this.textlength = 0;
+	this.opacity = 1;
+}
+
+OSD.prototype.update = function(){
+	
+	if(this.t <= 100){
+		this.boxstart = smoothstep(0, GU, this.t/100);
+		this.boxwidth = smoothstep(0, 4*GU*Math.sqrt(this.text.length/this.idealtextlength), Math.min(this.t/50,1));
+	}
+	if(this.t > 50 && this.t <= 150){
+		this.textlength = 0|smoothstep(0, this.text.length, Math.min((this.t-50)/10,1))+1;
+	}else if(this.t > 200){
+		this.opacity = smoothstep(1,0,Math.min((this.t-200)/50,1));
+	}
+	
+	
+	this.t++;
+}
 
 function render() {
+	
+	
+	/* render the 2d canvas */
 	tdx.clearRect(0,0,twoDCanvas.width, twoDCanvas.height);
 	if(t < fadeGoalTime){
 		tdx.fillStyle = "rgba(0,0,0,"+lerp(fadeStart,fadeGoal, (t-fadeStartTime)/(fadeGoalTime-fadeStartTime))+")";
@@ -153,9 +201,10 @@ function render() {
 		fadeGoalTime = 0;
 	}
 	
+	osd.render();
+	
 	camera.lookAt(cameratarget);
-	//if(t>2000000)kewbe.render();
-	//drawImage(STIAJE,2,15);
+	if(t>1500000)kewbe.render();
 	renderer.render(scene, camera);
 	
 }
@@ -225,6 +274,8 @@ function init() {
 
 	x_spacing = 5 + 2.545 + 0.5;
 	z_spacing = 4.363 * 2 + 0.5;
+	
+	osd = new OSD();
 
 
 	setLoadingBar(0.7,function(){
@@ -252,7 +303,7 @@ function init() {
 	setLoadingBar(0.8,function(){
 		
 	kewbe = new Kewbe();
-	lyte = new Lyte(0, 40, 0);
+	lyte = new Lyte(0, 200, 0);
 
 	
 	setLoadingBar(0.9,function(){
@@ -278,11 +329,20 @@ function init() {
 			cameraskip = false;
 		}
 	});
+	midi.add_callback(function(e){
+		/* text event, or something! */
+		/* and number 15 is reserved for META events :D */
+		if(e.midi_channel == 14){
+			osd.show(TEXTS[e.midi_number]);
+			}
+	})
 	fadeStartTime = 0;
 	fadeGoalTime = 0;
 	fadeStart = 0;
 	fadeGoal = 0;
-	fadeIn(40000);
+	fadeIn(100000);
+	/* for good measure */
+	resize();
 	mixer.start();
 	})})})})})})})})})});
 }
@@ -334,12 +394,6 @@ Hexagon.prototype.punch = function(height) {
 }
 
 Hexagon.prototype.update = function() {
-	if(this.mesh.position.y > 0){
-		this.mesh.position.y -= 10;
-	}else if(this.mesh.position.y < 0){
-		this.mesh.position.y=0;
-	}
-	//this.mesh.material = materials[((this.mesh.position.y-20) / 10 * materials.length) | 0];
 	this.mesh.material = materials[0];
 }
 
@@ -515,8 +569,8 @@ Kewbe.prototype.render = function() {
 
 function Lyte(x, y, z) {
 	this.planes = [];
-	this.w = 40;
-	this.h = 4;
+	this.w = 80*2;
+	this.h = 8*2;
 
 	this.x = +(x || 0);
 	this.y = +(y || 0);
@@ -525,7 +579,8 @@ function Lyte(x, y, z) {
 	this.number_of_planes = 6;
 	this.number_of_rays = 3;
 	this.rotation = new THREE.Vector3(0, 0, 0);
-	this.lyte = new THREE.Object3D(0, 0, 0);
+	this.lyte = new THREE.Object3D(0,0,0);
+	this.lyte.position.set(this.x,this.y,this.z);
 	this.rays = [];
 	for ( var j = 0; j < this.number_of_rays; j++) {
 		this.rays[j] = new THREE.Object3D(0, 0, 0);
@@ -536,8 +591,7 @@ function Lyte(x, y, z) {
 				map : this.get_texture(this.w, this.h, this.number_of_planes),
 				transparent : true,
 				blending: THREE.AdditiveBlending,
-				overdraw : true
-			})));
+				overdraw : false})));
 			this.rays[j].planes[i].rotation.x = i * Math.PI * 2
 					/ this.number_of_planes;
 			this.rays[j].planes[i].position.x = 0;
@@ -602,8 +656,10 @@ function Lyte(x, y, z) {
 	lyte_shell = subtract_bsp.subtract(ring_bsp);
 	var lyte_shell_g = lyte_shell.toGeometry();
 
-	this.lyte.add(new THREE.Mesh(lyte_shell_g, new THREE.MeshLambertMaterial(
-			0xCCCCCC)));
+	this.lyte.add(new THREE.Mesh(lyte_shell_g, new THREE.MeshLambertMaterial({
+		color:0xCCCCCC
+	}
+			)));
 	scene.add(this.lyte);
 }
 
@@ -628,9 +684,10 @@ Lyte.prototype.update = function() {
 
 	this.setIntensity(1 - (t % samples_per_quaver) / samples_per_quaver);
 
-	this.lyte.position.x = Math.sin(t / (20000)) * side * 2;
-	this.lyte.position.y = this.y;
-	this.lyte.position.z = Math.cos(t / (20000)) * side * 2;
+	
+	this.lyte.position.x = Math.sin(t / (30000)) * side * 2*6;
+	this.lyte.position.y = Math.cos(t / (40000)) * side * 2*6;
+	this.lyte.position.z = Math.cos(t / (50000)) * side * 2*6;
 
 	this.lyte.rotation.x += 0.017 * 2;
 	this.lyte.rotation.z += 0.019 * 2;

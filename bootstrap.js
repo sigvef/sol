@@ -70,7 +70,8 @@ window.requestAnimFrame = (function(){
                 twoDCanvas.width = 16*GU;
                 twoDCanvas.height = 9*GU;
                 twoDCanvas.style.margin = ((window.innerHeight - 9*GU) /2)+"px 0 0 "+((window.innerWidth-16*GU)/2)+"px";
-                tdx.font = GU+"pt Arial";
+                tdx.font = (GU/3)+"pt BebasNeue";
+                tdx.textBaseline = "top";
             }
             
             window.onresize = resize;
