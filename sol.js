@@ -145,6 +145,11 @@ function init() {
 	midi.add_callback(function(e) {
 		mixer.handle_event(e);
 	});
+	midi.add_callback(function(e){
+		if(e.note_number == 36 && e.midi_channel == 9){
+			newRandomCameraMovement(e.time_to_next_sameevent / midi.ticks_per_second * 44100*0.5);
+		}
+	});
 	camera = new THREE.PerspectiveCamera(45, 16 / 9, 0.1, 10000);
 	camera.position.y = 200;
 	startcamera = new THREE.PerspectiveCamera(45, 16 / 9, 0.1, 10000);
@@ -187,6 +192,27 @@ function init() {
 
 	kewbe = new Kewbe();
 	lyte = new Lyte(0, 40, 0);
+	
+	skybox = createSkybox("");
+	scene.add(skybox);
+}
+
+function createSkybox(url){
+	var urls = [
+	            url+"posx.jpg", url+"posx.jpg", url+"posx.jpg",
+	            url+"posx.jpg", url+"posx.jpg", url+"posx.jpg"
+	            ];
+	var textureCube = THREE.ImageUtils.loadTextureCube(urls);
+	var shader = THREE.ShaderUtils.lib.cube;
+	shader.uniforms.tCube.texture = textureCube;
+	var material = new THREE.ShaderMaterial({
+		fragmentShader : shader.fragmentShader,
+		vertexShader : shader.vertexShader,
+		uniforms: shader.uniforms
+	});
+	var skybox = new THREE.Mesh( new THREE.CubeGeometry(10000, 10000, 10000), material);
+	skybox.flipSided = true;
+	return skybox;
 }
 
 function Hexagon(x, y, z) {
@@ -491,9 +517,7 @@ Lyte.prototype.setIntensity = function(intensity) {
 
 Lyte.prototype.update = function() {
 
-	var samples_per_hemiquaver = midi.ticks_per_beat / midi.ticks_per_second
-			* 44100 * 0.5;
-	var samples_per_quaver = samples_per_hemiquaver * 2;
+	var samples_per_quaver = midi.ticks_per_beat / midi.ticks_per_second * 44100;
 
 	this.setIntensity(1 - (t % samples_per_quaver) / samples_per_quaver);
 
