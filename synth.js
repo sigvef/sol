@@ -78,6 +78,7 @@ Mixer.prototype.start = function(){
     this.jsnode.connect(this.gainNode);
     this.jsnode.connect(this.convolver);
     this.jsnode.connect(this.analyser);
+    console.log("Start!");
 }
 
 function Instrument(channel){

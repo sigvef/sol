@@ -2,7 +2,6 @@ DEBUG = false;
 ORIGO = new THREE.Vector3(0, 0, 0);
 cameraMovementDone = true;
 
-//STIAJE = {data:"RBYDXCDBCDCCBCBCBCBCBEJBCBCBCBCBCBCBCCCBCBCBCBCBCBCDEBCBCBFBCBDBDCDBCBCBCBCBCCCBBBDECBCEICFBFBCCDCBFDDBDCF",w:25,h:11};
 STIAJE = {data:"RBYDXCDBCDCCBCBCBCBCBJBCBCBCBCBCBCBCCCBCBCBCBCBCBDCEBCBCBFBCBDBDCDBCBCBCBCBCCCBBBDECBCEICFBFBCCDCBFDDBDCF",w:25,h:11};
 IVERJO= {data:"TB\\D[CLBFBDBBCBCDBCCBFBEBCBCBCBHBCBCBCBBBCBCBCBCBEBCBCBDCCBCBCBCBEBCBCBDCECCBCBEBCBCBCDCBCECBEBCBCBEBCBCBCBHBCBCCDBFBCCDRBL",w:28,h:12};
 
@@ -25,7 +24,7 @@ function drawImage(img,startx,starty){
 		var num = img.data.charCodeAt(i)-65;
 		while(num-->0){
 			cubes[(side-x-1)*side+y].mesh.position.y = on?25+5*Math.sin(x/4+t/4000):0;
-			//cubes[(side-x-1)*side+y].mesh.material = materials[+on*2];
+			cubes[(side-x-1)*side+y].mesh.material = materials[+on];
 			x++;
 			if(x>startx+img.w){
 				x = startx+1;
@@ -38,12 +37,12 @@ function drawImage(img,startx,starty){
 
 function newRandomCameraMovement(movementTime){
 	newCameraMovement(movementTime,
-		200*(Math.random()-0.5),
-		200*(Math.random()-0.5),
-		200*(Math.random()-0.5),
-		200*(Math.random()-0.5),
-		200*(Math.random()-0.5),
-		200*(Math.random()-0.5)
+		600*(Math.random()-0.5),
+		600*(Math.random()-0.5),
+		600*(Math.random()-0.5),
+		600*(Math.random()-0.5),
+		600*(Math.random()-0.5),
+		600*(Math.random()-0.5)
 	);
 }
 
@@ -86,6 +85,27 @@ function update() {
 	camera.position.z = lyte.z + Math.cos(t / 44100) * side * 8;
 	*/
 	
+	/* update particle system */
+	/*
+	for(var i=0;i<num_particles;i++){
+		p = particles.vertices[i];
+		nextp = particles.vertices[(i+1)%num_particles];
+		
+		p.dx += nextp.x-p.x<0?-0.1:0.1;
+		p.dy += nextp.y-p.y<0?-0.1:0.1;
+		p.dz += nextp.z-p.z<0?-0.1:0.1;
+		
+		p.dx = Math.max(-3, Math.min(p.dx+nextp.dx, 3));
+		p.dy = Math.max(-3, Math.min(p.dy+nextp.dy, 3));
+		p.dz = Math.max(-3, Math.min(p.dz+nextp.dz, 3));
+		
+		p.x += p.dx;
+		p.y += p.dy;
+		p.z += p.dz;
+	}
+	particles.verticesNeedUpdate = true;
+	*/
+	
 	/* interpolate camera movement */
 	if(!cameraMovementDone){
 		var interpolt = (t-startcamera.time)/(goalcamera.time-startcamera.time);
@@ -116,20 +136,44 @@ function update() {
 	drawImage(IVERJO,2,1);
 	*/
 
-	kewbe.update();
+	//t<2000000?drawImage(STIAJE,2,15):kewbe.update();
 	lyte.update();
 }
 
+function Toob(){
+	this.num_rings = 4;
+}
+
+Toob.prototype.render = function(){
+	var timeoffset = t/10000;
+	for(var x=0;x<side;x++){
+		for(var y=0;y<side;y++){
+			cubes[x*side+y].mesh.position.y= 10*+(Math.sin(timeoffset+x/3) + Math.cos(timeoffset+y/5)); 
+		}
+	}
+}
+
+Toob.prototype.update = function(){
+	
+}
+
 function render() {
-	camera.lookAt(ORIGO);
-	kewbe.render();
+	tdx.clearRect(0,0,twoDCanvas.width, twoDCanvas.height);
+	if(t < fadeGoalTime){
+		tdx.fillStyle = "rgba(0,0,0,"+lerp(fadeStart,fadeGoal, (t-fadeStartTime)/(fadeGoalTime-fadeStartTime))+")";
+		tdx.fillRect(0,0,16*GU,9*GU);
+	}else if(fadeGoalTime != 0){
+		tdx.fillStyle = "rgba(0,0,0,"+fadeGoal+")";
+		tdx.fillRect(0,0,16*GU,9*GU);
+		fadeGoalTime = 0;
+	}
+	
+	camera.lookAt(cameratarget);
+	//if(t>2000000)kewbe.render();
+	//drawImage(STIAJE,2,15);
+	toob.render();
 	renderer.render(scene, camera);
 	
-	tdx.clearRect(0,0,twoDCanvas.width, twoDCanvas.height);
-	tdx.fillStyle = "rgba(0,0,0,0.5)";
-	tdx.fillRect(GU,GU,2*GU,2*GU);
-	tdx.fillText("This is a cheap",2*GU,5*GU);
-	tdx.fillText("way to do text",2*GU,6.1*GU);
 }
 
 function vtv(a, b) {
@@ -153,6 +197,10 @@ function init() {
 	mixer = new Mixer();
 
 	setLoadingBar(0.4,function(){
+		
+	toob = new Toob();
+		
+	setLoadingBar(0.4,function(){
 	camera = new THREE.PerspectiveCamera(45, 16 / 9, 0.1, 10000);
 	camera.position.y = 200;
 	startcamera = new THREE.PerspectiveCamera(45, 16 / 9, 0.1, 10000);
@@ -161,9 +209,33 @@ function init() {
 	goalcamera.time = 0;
 	cameratarget = new THREE.Vector3(0,0,0);
 
+	setLoadingBar(0.5,function(){
+		
+	scene = new THREE.Scene();
+	
+	/*
+	num_particles = 300;
+	particles = new THREE.Geometry();
+	particleMaterial = new THREE.ParticleBasicMaterial({color:0xFFFFFF,size:20,map:THREE.ImageUtils.loadTexture("bee.png")});
+	
+	for(var i=0;i<num_particles;i++){
+		var particle = new THREE.Vector3(
+				(Math.random()-0.5)*1000,
+				(Math.random()-0.5)*1000,
+				(Math.random()-0.5)*1000
+		);
+		particle.dx = 0;
+		particle.dy = 0;
+		particle.dz = 0;
+		particles.vertices.push(particle);
+	}
+	
+	particleSystem = new THREE.ParticleSystem(particles,particleMaterial);
+	scene.add(particleSystem);
+	*/
+		
 	setLoadingBar(0.6,function(){
 
-	scene = new THREE.Scene();
 	scene.add(camera);
 	cubes = [];
 	side = 32;
@@ -174,17 +246,13 @@ function init() {
 
 	setLoadingBar(0.7,function(){
 	
-	materials = [ new THREE.MeshLambertMaterial({
+	materials = [
+	             new THREE.MeshLambertMaterial({
 		color : 0xE8B86F, blending : THREE.AdditiveBlending, transparent:true
-	}), new THREE.MeshLambertMaterial({
-		color : 0xFFBD0D
-	}), new THREE.MeshLambertMaterial({
-		color : 0xFF7F00
-	}), new THREE.MeshLambertMaterial({
-		color : 0xE85700
-	}), new THREE.MeshLambertMaterial({
-		color : 0x4A0808
-	}) ];
+	}), 
+	             new THREE.MeshLambertMaterial({
+		color : 0xE8B86F, blending : THREE.AdditiveBlending, transparent:false})
+	];
 
 	geometry = createHexagonGeometry(10, -10);
 	for ( var i = 0; i < side; i++) {
@@ -210,22 +278,50 @@ function init() {
 		
 	
 	setLoadingBar(1,function(){
+		cameraskip = false;
 	midi.add_callback(function(e) {
 		mixer.handle_event(e);
 	});
 	midi.add_callback(function(e){
-		if(e.note_number == 36 && e.midi_channel == 9){
-			newRandomCameraMovement(e.time_to_next_sameevent / midi.ticks_per_second * 44100*0.5);
+		if(!cameraskip){
+		if(e.note_number == 39 && e.midi_channel == 9){
+			cameraskip = Math.random()>0.3?true:false;
+			movementtime = e.time_to_next_sameevent / midi.ticks_per_second * 44100;
+			if(cameraskip) movementtime*=2;
+			newRandomCameraMovement(movementtime);
+		}
+		}
+		else if(e.note_number == 39 && e.midi_channel == 9){
+			cameraskip = false;
 		}
 	});
+	fadeStartTime = 0;
+	fadeGoalTime = 0;
+	fadeStart = 0;
+	fadeGoal = 0;
+	fadeIn(40000);
 	mixer.start();
-	})})})})})})})});
+	})})})})})})})})})});
+}
+
+function fadeIn(duration){
+	fadeStartTime = t;
+	fadeGoalTime = t+duration;
+	fadeStart = 1;
+	fadeGoal = 0;
+}
+
+function fadeOut(duration){
+	fadeStartTime = t;
+	fadeGoalTime = t+duration;
+	fadeStart = 0;
+	fadeGoal = 1;
 }
 
 function createSkybox(url){
 	var urls = [
-	            url+"posx.jpg", url+"posx.jpg", url+"posx.jpg",
-	            url+"posx.jpg", url+"posx.jpg", url+"posx.jpg"
+	            url+"posx.png", url+"posx.png", url+"posx.png",
+	            url+"posx.png", url+"posx.png", url+"posx.png"
 	            ];
 	var textureCube = THREE.ImageUtils.loadTextureCube(urls);
 	var shader = THREE.ShaderUtils.lib.cube;
@@ -251,6 +347,7 @@ function Hexagon(x, y, z) {
 Hexagon.prototype.punch = function(height) {
 	//this.mesh.material = materials[(height * materials.length) | 0];
 	this.mesh.position.y = 10 * height;
+	this.mesh.material = materials[+!!height];
 }
 
 Hexagon.prototype.update = function() {
@@ -260,6 +357,7 @@ Hexagon.prototype.update = function() {
 		this.mesh.position.y=0;
 	}
 	//this.mesh.material = materials[((this.mesh.position.y-20) / 10 * materials.length) | 0];
+	this.mesh.material = materials[0];
 }
 
 function createHexagonGeometry(hy, ly) {
@@ -454,6 +552,7 @@ function Lyte(x, y, z) {
 					this.w, this.h, 1, 1), new THREE.MeshBasicMaterial({
 				map : this.get_texture(this.w, this.h, this.number_of_planes),
 				transparent : true,
+				blending: THREE.AdditiveBlending,
 				overdraw : true
 			})));
 			this.rays[j].planes[i].rotation.x = i * Math.PI * 2

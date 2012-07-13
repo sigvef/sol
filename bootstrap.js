@@ -35,11 +35,13 @@ window.requestAnimFrame = (function(){
             	tdx.fillStyle = "black";
             	tdx.fillRect(GU, 4.25*GU,14*GU*completed ,GU*0.5);
             	console.log("LOADING",completed);
-            	setTimeout(fn,0);
-            	if(completed == 1){
-            		tdx.clearRect(0,0,16*GU,9*GU);
-	                requestAnimFrame(loop);
-            	}
+            	setTimeout(function(){
+	            	fn();
+	            	if(completed == 1){
+	            		tdx.clearRect(0,0,16*GU,9*GU);
+		                requestAnimFrame(loop);
+	            	}
+            	},0);
             }
 
             function bootstrap(){
