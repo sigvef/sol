@@ -162,7 +162,7 @@ function init() {
 	z_spacing = 4.363 * 2 + 0.5;
 
 	materials = [ new THREE.MeshLambertMaterial({
-		color : 0xE8B86F
+		color : 0xE8B86F, blending : THREE.AdditiveBlending, transparent:true
 	}), new THREE.MeshLambertMaterial({
 		color : 0xFFBD0D
 	}), new THREE.MeshLambertMaterial({
