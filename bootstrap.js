@@ -60,8 +60,15 @@ window.requestAnimFrame = (function(){
 				twoDCanvas.style.zIndex = "9999";
 				twoDCanvas.style.background = "transparent";
 				tdx = twoDCanvas.getContext("2d");
+				scanlinecanvas = document.createElement("canvas");
+				scanlinecanvas.style.position = "absolute";
+				scanlinecanvas.style.left = "0";
+				scanlinecanvas.style.zIndex = "999";
+				scanlinecanvas.style.background = "transparent";
+				slx = scanlinecanvas.getContext("2d");
                 resize();
                 document.body.appendChild(renderer.domElement);
+                document.body.appendChild(scanlinecanvas);
                 document.body.appendChild(twoDCanvas);
                 setTimeout(start,0);
             }
@@ -80,6 +87,22 @@ window.requestAnimFrame = (function(){
                 twoDCanvas.style.margin = ((window.innerHeight - 9*GU) /2)+"px 0 0 "+((window.innerWidth-16*GU)/2)+"px";
                 tdx.font = (GU/3)+"pt BebasNeue";
                 tdx.textBaseline = "top";
+                scanlinecanvas.width = 16*GU;
+                scanlinecanvas.height = 9*GU;
+                scanlinecanvas.style.margin = ((window.innerHeight - 9*GU) /2)+"px 0 0 "+((window.innerWidth-16*GU)/2)+"px";
+				slx.fillStyle = "rgba(0,0,0,0.05)";
+				for(var i=0;i<9;i++){
+					slx.fillRect(0,i*GU+0.0*GU,16*GU,0.05*GU);
+					slx.fillRect(0,i*GU+0.1*GU,16*GU,0.05*GU);
+					slx.fillRect(0,i*GU+0.2*GU,16*GU,0.05*GU);
+					slx.fillRect(0,i*GU+0.3*GU,16*GU,0.05*GU);
+					slx.fillRect(0,i*GU+0.4*GU,16*GU,0.05*GU);
+					slx.fillRect(0,i*GU+0.5*GU,16*GU,0.05*GU);
+					slx.fillRect(0,i*GU+0.6*GU,16*GU,0.05*GU);
+					slx.fillRect(0,i*GU+0.7*GU,16*GU,0.05*GU);
+					slx.fillRect(0,i*GU+0.8*GU,16*GU,0.05*GU);
+					slx.fillRect(0,i*GU+0.9*GU,16*GU,0.05*GU);
+				}
             }
             
             window.onresize = resize;
