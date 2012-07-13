@@ -1,5 +1,6 @@
 DEBUG = false;
 ORIGO = new THREE.Vector3(0, 0, 0);
+cameraMovementDone = true;
 
 //STIAJE = {data:"RBYDXCDBCDCCBCBCBCBCBEJBCBCBCBCBCBCBCCCBCBCBCBCBCBCDEBCBCBFBCBDBDCDBCBCBCBCBCCCBBBDECBCEICFBFBCCDCBFDDBDCF",w:25,h:11};
 STIAJE = {data:"RBYDXCDBCDCCBCBCBCBCBJBCBCBCBCBCBCBCCCBCBCBCBCBCBDCEBCBCBFBCBDBDCDBCBCBCBCBCCCBBBDECBCEICFBFBCCDCBFDDBDCF",w:25,h:11};
@@ -24,7 +25,7 @@ function drawImage(img,startx,starty){
 		var num = img.data.charCodeAt(i)-65;
 		while(num-->0){
 			cubes[(side-x-1)*side+y].mesh.position.y = on?25+5*Math.sin(x/4+t/4000):0;
-			cubes[(side-x-1)*side+y].mesh.material = materials[+on*2];
+			//cubes[(side-x-1)*side+y].mesh.material = materials[+on*2];
 			x++;
 			if(x>startx+img.w){
 				x = startx+1;
@@ -35,31 +36,93 @@ function drawImage(img,startx,starty){
 	}
 }
 
+function newRandomCameraMovement(movementTime){
+	newCameraMovement(movementTime,
+		200*(Math.random()-0.5),
+		200*(Math.random()-0.5),
+		200*(Math.random()-0.5),
+		200*(Math.random()-0.5),
+		200*(Math.random()-0.5),
+		200*(Math.random()-0.5)
+	);
+}
+
+function newCameraMovement(movementTime, posx, posy, posz, rotx, roty, rotz, tarx,tary,tarz){
+	cameraMovementDone = false;
+	deepCopy3DObject(camera, startcamera);
+	startcamera.time = t;
+	
+	goalcamera.position.x = posx;
+	goalcamera.position.y = posy;
+	goalcamera.position.z = posz;
+	
+	goalcamera.rotation.x = rotx;
+	goalcamera.rotation.y = roty;
+	goalcamera.rotation.z = rotz;
+	
+	cameratarget.x = tarx || 0;
+	cameratarget.y = tary || 0;
+	cameratarget.z = tarz || 0;
+	
+	//var samples_per_quaver = midi.ticks_per_beat / midi.ticks_per_second * 44100;
+	goalcamera.time = t+movementTime;
+	
+}
+
+function deepCopy3DObject(from, to){
+	to.position.x = from.position.x;
+	to.position.y = from.position.y;
+	to.position.z = from.position.z;
+	
+	to.rotation.x = from.rotation.x;
+	to.rotation.y = from.rotation.y;
+	to.rotation.z = from.rotation.z;
+}
+
 function update() {
 	
+	/*
 	camera.position.x = lyte.x + Math.sin(t / 44100) * side * 8;
 	camera.position.z = lyte.z + Math.cos(t / 44100) * side * 8;
+	*/
+	
+	/* interpolate camera movement */
+	if(!cameraMovementDone){
+		var interpolt = (t-startcamera.time)/(goalcamera.time-startcamera.time);
+		if(interpolt >=0 && interpolt < 1){
+			camera.position.x = smoothstep(startcamera.position.x, goalcamera.position.x, interpolt);
+			camera.position.y = smoothstep(startcamera.position.y, goalcamera.position.y, interpolt);
+			camera.position.z = smoothstep(startcamera.position.z, goalcamera.position.z, interpolt);
+			
+			camera.rotation.x = smoothstep(startcamera.rotation.x, goalcamera.rotation.x, interpolt);
+			camera.rotation.y = smoothstep(startcamera.rotation.y, goalcamera.rotation.y, interpolt);
+			camera.rotation.z = smoothstep(startcamera.rotation.z, goalcamera.rotation.z, interpolt);
+		}else{
+			deepCopy3DObject(goalcamera, camera);
+			cameraMovementDone = true;
+		}
+	}
 	
 	light.position.x = -camera.position.x;
 	light.position.y = camera.position.y;
 	light.position.z = -camera.position.z;
 
 	var samples_per_quaver = midi.ticks_per_beat / midi.ticks_per_second * 44100;
-	/*
 	for ( var i = 0; i < side * side; i++) {
 		cubes[i].update();
 	}
-	*/
+	/*
 	drawImage(STIAJE,2,15);
 	drawImage(IVERJO,2,1);
+	*/
 
-	//kewbe.update();
+	kewbe.update();
 	lyte.update();
 }
 
 function render() {
 	camera.lookAt(ORIGO);
-	//kewbe.render();
+	kewbe.render();
 	renderer.render(scene, camera);
 }
 
@@ -83,7 +146,12 @@ function init() {
 		mixer.handle_event(e);
 	});
 	camera = new THREE.PerspectiveCamera(45, 16 / 9, 0.1, 10000);
-	camera.position.y = 220;
+	camera.position.y = 200;
+	startcamera = new THREE.PerspectiveCamera(45, 16 / 9, 0.1, 10000);
+	startcamera.time = 0;
+	goalcamera = new THREE.PerspectiveCamera(45, 16 / 9, 0.1, 10000);
+	goalcamera.time = 0;
+	cameratarget = new THREE.Vector3(0,0,0);
 
 	scene = new THREE.Scene();
 	scene.add(camera);
@@ -136,11 +204,11 @@ Hexagon.prototype.punch = function(height) {
 
 Hexagon.prototype.update = function() {
 	if(this.mesh.position.y > 0){
-		this.mesh.position.y -= 1;
+		this.mesh.position.y -= 10;
 	}else if(this.mesh.position.y < 0){
 		this.mesh.position.y=0;
 	}
-	//this.mesh.material = materials[(this.mesh.position.y / 10 * materials.length) | 0];
+	//this.mesh.material = materials[((this.mesh.position.y-20) / 10 * materials.length) | 0];
 }
 
 function createHexagonGeometry(hy, ly) {
