@@ -140,22 +140,7 @@ function update() {
 	lyte.update();
 }
 
-function Toob(){
-	this.num_rings = 4;
-}
 
-Toob.prototype.render = function(){
-	var timeoffset = t/10000;
-	for(var x=0;x<side;x++){
-		for(var y=0;y<side;y++){
-			cubes[x*side+y].mesh.position.y= 10*+(Math.sin(timeoffset+x/3) + Math.cos(timeoffset+y/5)); 
-		}
-	}
-}
-
-Toob.prototype.update = function(){
-	
-}
 
 function render() {
 	tdx.clearRect(0,0,twoDCanvas.width, twoDCanvas.height);
@@ -171,7 +156,6 @@ function render() {
 	camera.lookAt(cameratarget);
 	//if(t>2000000)kewbe.render();
 	//drawImage(STIAJE,2,15);
-	toob.render();
 	renderer.render(scene, camera);
 	
 }
@@ -198,7 +182,6 @@ function init() {
 
 	setLoadingBar(0.4,function(){
 		
-	toob = new Toob();
 		
 	setLoadingBar(0.4,function(){
 	camera = new THREE.PerspectiveCamera(45, 16 / 9, 0.1, 10000);
