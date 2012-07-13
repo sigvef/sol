@@ -9,7 +9,7 @@ function Mixer(){
     var that = this;
     this.jsnode.onaudioprocess = function(e){that.process(e);};
 
-    //midi.play_forward(25000); //Just for testing: skip ahead in the song.
+    //midi.play_forward(14000); //Just for testing: skip ahead in the song.
     this.process = function(e){
 
         var datal = e.outputBuffer.getChannelData(0);
@@ -207,15 +207,17 @@ function instruments(instrument) {
 			return this.out;
 	};
 	case 2:
-		return function(t) {	//Sine
+		return function(t) {	//Sine with noise and waveshaper
 			this.out = 0;
 			for(var i=0;i<this.num_active_notes;i++){
 	    		this.amplitude = this.envelope(i);
 	    		if (!this.amplitude) continue;
-				this.out += this.amplitude*A*this.note_pool[i].velocity*sin(
-						(note2freq[this.note_pool[i].note_number]*t*128*RATE_RECIPROCAL));
+				this.out += this.amplitude*A3*this.note_pool[i].velocity*(
+					0.05 * (Math.random()-0.5)
+					+ sin((note2freq[this.note_pool[i].note_number]*t*128*RATE_RECIPROCAL))
+						);
 			};
-			
+			this.out = 0.25*(this.out/(1+Math.abs(this.out))) + 0.28*this.out;
 			return this.out;
 	};
 	case 3:
