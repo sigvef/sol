@@ -32,8 +32,15 @@ window.requestAnimFrame = (function(){
 
             function bootstrap(){
                 renderer = new THREE.WebGLRenderer({ maxLights: 10,antialias:true });
+				twoDCanvas = document.createElement("canvas");
+				twoDCanvas.style.position = "absolute";
+				twoDCanvas.style.left = "0";
+				twoDCanvas.style.zIndex = "9999";
+				twoDCanvas.style.background = "transparent";
+				tdx = twoDCanvas.getContext("2d");
                 resize();
                 document.body.appendChild(renderer.domElement);
+                document.body.appendChild(twoDCanvas);
                 setTimeout(start,0);
             }
 
@@ -46,6 +53,10 @@ window.requestAnimFrame = (function(){
                 }
                 renderer.setSize(16*GU, 9*GU);
                 renderer.domElement.style.margin = ((window.innerHeight - 9*GU) /2)+"px 0 0 "+((window.innerWidth-16*GU)/2)+"px";
+                twoDCanvas.width = 16*GU;
+                twoDCanvas.height = 9*GU;
+                twoDCanvas.style.margin = ((window.innerHeight - 9*GU) /2)+"px 0 0 "+((window.innerWidth-16*GU)/2)+"px";
+                tdx.font = GU+"pt Arial";
             }
             
             window.onresize = resize;

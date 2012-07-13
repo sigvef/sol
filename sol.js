@@ -124,6 +124,12 @@ function render() {
 	camera.lookAt(ORIGO);
 	kewbe.render();
 	renderer.render(scene, camera);
+	
+	tdx.clearRect(0,0,twoDCanvas.width, twoDCanvas.height);
+	tdx.fillStyle = "rgba(0,0,0,0.5)";
+	tdx.fillRect(GU,GU,2*GU,2*GU);
+	tdx.fillText("This is a cheap",2*GU,5*GU);
+	tdx.fillText("way to do text",2*GU,6.1*GU);
 }
 
 function vtv(a, b) {
