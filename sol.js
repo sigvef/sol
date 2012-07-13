@@ -25,7 +25,7 @@ SCENES = [
          function(){
          }),
          
-         /* (whatever named scene... what is this?... )*/
+         /* follow the lyte */
          new Scene(280000, 1000000, function(){
 			updateHexagonGrid();
 			lyte.update();
@@ -37,7 +37,8 @@ SCENES = [
         	 cameratarget = lyte.lyte.position;
          }),
          
-         new Scene(1000000, 999999999999, function(){
+         /* 3d2d3d */
+         new Scene(1000000, 4000000, function(){
 			updateHexagonGrid();
 			kewbe.update();
 			osd.update();
@@ -46,7 +47,27 @@ SCENES = [
         	kewbe.render();
          },function(){
         	 cameratarget = ORIGO;
-         })
+         }),
+         
+         /* our names */
+        new Scene(4000000,5000000,function(){
+			updateHexagonGrid();
+			osd.update();
+			lyte.update();
+        },function(){
+        	
+        },function(){
+        	 cameratarget = ORIGO;
+        }),
+        
+        /* fade to black and exit or whatever */
+        new Scene(5000000,6000000,function(){
+        	
+        },function(){
+        	
+        },function(){
+        	
+        })
           ];
 		
 
