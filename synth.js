@@ -64,9 +64,6 @@ function Mixer(){
     }
     this.convolver.buffer = buffer;
     
-    this.jsnode.connect(this.gainNode);
-    this.jsnode.connect(this.convolver);
-    this.jsnode.connect(this.analyser);
     this.convolver.connect(this.analyser);
     this.analyser.connect(this.gainNode);
     this.gainNode.connect(this.ax.destination);
@@ -75,6 +72,12 @@ function Mixer(){
     this.setVolume = function(v) {
         this.gainNode.gain.value = v;
     };
+}
+
+Mixer.prototype.start = function(){
+    this.jsnode.connect(this.gainNode);
+    this.jsnode.connect(this.convolver);
+    this.jsnode.connect(this.analyser);
 }
 
 function Instrument(channel){
