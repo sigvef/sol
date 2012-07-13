@@ -9,6 +9,47 @@ TEXTS = [
         "KEEP UP THE GOOD FUN @ SOLSKOGEN 2012"
          ];
 
+active_scene = 0;
+/* please specify these in chrono order! */
+/* yes, because i am lazy */
+SCENES = [
+          /* introduction */
+         new Scene(0,280000, function(){
+			updateHexagonGrid();
+			lyte.update();
+			osd.update();
+			if(cameratarget != ORIGO) cameratarget = ORIGO;
+         },
+         function(){
+         },
+         function(){
+         }),
+         
+         /* (whatever named scene... what is this?... )*/
+         new Scene(280000, 1000000, function(){
+			updateHexagonGrid();
+			lyte.update();
+			osd.update();
+         },
+         function(){
+         },
+         function(){
+        	 cameratarget = lyte.lyte.position;
+         }),
+         
+         new Scene(1000000, 999999999999, function(){
+			updateHexagonGrid();
+			kewbe.update();
+			osd.update();
+			lyte.update();
+         },function(){
+        	kewbe.render();
+         },function(){
+        	 cameratarget = ORIGO;
+         })
+          ];
+		
+
 STIAJE = {data:"RBYDXCDBCDCCBCBCBCBCBJBCBCBCBCBCBCBCCCBCBCBCBCBCBDCEBCBCBFBCBDBDCDBCBCBCBCBCCCBBBDECBCEICFBFBCCDCBFDDBDCF",w:25,h:11};
 IVERJO= {data:"TB\\D[CLBFBDBBCBCDBCCBFBEBCBCBCBHBCBCBCBBBCBCBCBCBEBCBCBDCCBCBCBCBEBCBCBDCECCBCBEBCBCBCDCBCECBEBCBCBEBCBCBCBHBCBCCDBFBCCDRBL",w:28,h:12};
 
@@ -108,13 +149,14 @@ function update() {
 	light.position.y = camera.position.y;
 	light.position.z = -camera.position.z;
 
-	if(t>1500000){
+	/*
+	if(t>1000000){
 		updateHexagonGrid();
 		kewbe.update();
 		osd.update();
 		lyte.update();
 		if(cameratarget != ORIGO) cameratarget = ORIGO;
-	}else if(t > 300000 && t< 1500000){
+	}else if(t > 280000 && t< 1000000){
 		updateHexagonGrid();
 		lyte.update();
 		osd.update();
@@ -125,6 +167,15 @@ function update() {
 		lyte.update();
 		osd.update();
 		if(cameratarget != ORIGO) cameratarget = ORIGO;
+	}
+	*/
+	
+	if(t < SCENES[active_scene].endtime){
+		SCENES[active_scene].update();
+	}else{
+		active_scene++;
+		SCENES[active_scene].onenter();
+		console.log("active scene is now",active_scene);
 	}
 	
 
@@ -192,6 +243,7 @@ function render() {
 	
 	/* render the 2d canvas */
 	tdx.clearRect(0,0,twoDCanvas.width, twoDCanvas.height);
+	osd.render(); //yah, we just always render the osd
 	if(t < fadeGoalTime){
 		tdx.fillStyle = "rgba(0,0,0,"+lerp(fadeStart,fadeGoal, (t-fadeStartTime)/(fadeGoalTime-fadeStartTime))+")";
 		tdx.fillRect(0,0,16*GU,9*GU);
@@ -201,12 +253,19 @@ function render() {
 		fadeGoalTime = 0;
 	}
 	
-	osd.render();
+	SCENES[active_scene].render();
 	
 	camera.lookAt(cameratarget);
-	if(t>1500000)kewbe.render();
 	renderer.render(scene, camera);
 	
+}
+
+function Scene(starttime,endtime,update,render, onenter){
+	this.starttime = starttime;
+	this.endtime = endtime;
+	this.update = update;
+	this.render = render;
+	this.onenter = onenter;
 }
 
 function vtv(a, b) {
