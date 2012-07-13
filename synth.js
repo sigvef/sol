@@ -2,7 +2,7 @@ t = 0;
 play_forward_trigger = 0;
 function Mixer(){
     this.ax = new webkitAudioContext();
-    this.jsnode = this.ax.createJavaScriptNode(1024,1,2);
+    this.jsnode = this.ax.createJavaScriptNode(1024*2,1,2);
     this.note_number = 0;
     this.velocity = 0;
 
@@ -67,7 +67,7 @@ function Mixer(){
     this.convolver.connect(this.analyser);
     this.analyser.connect(this.gainNode);
     this.gainNode.connect(this.ax.destination);
-    this.gainNode.gain.value = 0.05;
+    this.gainNode.gain.value = 1;
 
     this.setVolume = function(v) {
         this.gainNode.gain.value = v;
