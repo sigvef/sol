@@ -182,7 +182,6 @@ function saw(x) {
 function instruments(instrument) {
 	switch(instrument) {
 	case 0:
-	case 1:
 	case 2:
 	case 3:
 	case 4:
@@ -201,8 +200,7 @@ function instruments(instrument) {
 		    };
 		    return this.out;
 		};
-		/*
-	case 1:
+	case 100:
 		return function(t) {	//Saw
 			this.out = 0;
 			for(var i=0;i<this.num_active_notes;i++){
@@ -215,7 +213,7 @@ function instruments(instrument) {
 			};
 			return this.out;
 	};
-	case 2:
+	case 101:
 		return function(t) {	//Sine with noise and waveshaper
 			this.out = 0;
 			for(var i=0;i<this.num_active_notes;i++){
@@ -229,7 +227,7 @@ function instruments(instrument) {
 			this.out = 0.25*(this.out/(1+Math.abs(this.out))) + 0.28*this.out;
 			return this.out;
 	};
-	case 3:
+	case 1:
 		return function(t) {	//Noisy saw with chorus, vibrato and octaver
 			this.out = 0;
 			for(var i=0;i<this.num_active_notes;i++){
@@ -252,6 +250,7 @@ function instruments(instrument) {
 			};
 			return this.out;
 	};
+	/*
 	case 4:
 		return function(t) {	//White noise
 			this.out = 0;
