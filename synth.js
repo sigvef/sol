@@ -67,7 +67,7 @@ function Mixer(){
     this.convolver.connect(this.analyser);
     this.analyser.connect(this.gainNode);
     this.gainNode.connect(this.ax.destination);
-    this.gainNode.gain.value = 1;
+    this.gainNode.gain.value = 0.05;
 
     this.setVolume = function(v) {
         this.gainNode.gain.value = v;
@@ -182,6 +182,14 @@ function saw(x) {
 function instruments(instrument) {
 	switch(instrument) {
 	case 0:
+	case 1:
+	case 2:
+	case 3:
+	case 4:
+	case 5:
+	case 6:
+	case 7:
+	case 8:
 		return function(t) {	//Square
 		    this.out = 0;
 		    for(var i=0;i<this.num_active_notes;i++){
@@ -193,6 +201,7 @@ function instruments(instrument) {
 		    };
 		    return this.out;
 		};
+		/*
 	case 1:
 		return function(t) {	//Saw
 			this.out = 0;
@@ -268,6 +277,7 @@ function instruments(instrument) {
 		}
 		return this.out;
 	};
+	*/
 	case 9:
 		return function(t) {	//Drum sampler
 		this.out = 0;
