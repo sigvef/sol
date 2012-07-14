@@ -1,0 +1,28 @@
+#=======================#
+| HONEYCOMB BY NINJADEV |
+#=======================#
+
+Hi everyone,  this is our
+first demo!  The demo  is
+Chrome-only due to use of
+the  wekbit webaudio API,
+sorry firefox users!
+
+Please  run  Chrome  with
+the  --allow-file-access-
+from-files  flag  if  you
+want   to  run  the  demo
+directly  from  the  file
+system.    If   you  have
+python installed, you can
+run    our   conveniently
+bundled   server.py  from
+the demo   directory  and
+direct  your  browser  to
+localhost:8080.
+
+Music, graphics and code:
+        stiaje
+        iverjo
+       cristea
+       sigveseb

@@ -126,7 +126,7 @@ SCENES = [
         },function(){
         	 cameratarget = ORIGO;
         	 osd.show(TEXTS[6]);
-        	fadeOut(44100*4,function(){
+        	fadeOut(44100*8,function(){
         		now.we.crash.the.demo.because.it.is.the.fastest.way.to.stop(":D");
         	});
         }),
