@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 import sys
 import BaseHTTPServer
 from SimpleHTTPServer import SimpleHTTPRequestHandler
