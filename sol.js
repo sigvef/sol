@@ -605,7 +605,7 @@ function Kewbe() {
 		y : -100,
 		z : -100
 	} ];
-	this.flat = [ {
+	this.flat = [ {x : 0,y : 0}, {
 		x : 0,
 		y : 0
 	}, {
@@ -626,10 +626,7 @@ function Kewbe() {
 	}, {
 		x : 0,
 		y : 0
-	}, {
-		x : 0,
-		y : 0
-	}, ];
+	} ];
 }
 
 Kewbe.prototype.update = function() {
