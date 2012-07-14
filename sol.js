@@ -2,7 +2,6 @@ DEBUG = false;
 ORIGO = new THREE.Vector3(0, 0, 0);
 cameraMovementDone = true;
 
-
 TEXTS = [
         "HONEYCOMB BY NINJADEV",
         "(OUR FIRST DEMO EVER :3)",
@@ -103,9 +102,9 @@ SCENES = [
 			kewbe.update();
 			osd.update();
 			lyte.update();
-			camera.position.x = 440*Math.sin(t/30000);
-			camera.position.y = 440*Math.cos(t/40000);
-			camera.position.z = 440*Math.sin(t/50000);
+			camera.position.x = 440*Math.sin(t/30307);
+			camera.position.y = 440*Math.cos(t/46020);
+			camera.position.z = 440*Math.sin(t/63001);
          },function(){
         	kewbe.render();
          },function(){
@@ -125,18 +124,22 @@ SCENES = [
         	
         },function(){
         	 cameratarget = ORIGO;
+        	 camera.position.y = 300;
         	 osd.show(TEXTS[6]);
-        	fadeOut(44100*4,function(){
-        		now.we.crash.the.demo.because.it.is.the.fastest.way.to.stop(":D");
-        	});
         }),
         
         /* fade to black and exit or whatever */
         new Scene(function(){
-        	
+        	someRandomHexagonGridEffect();
+			camera.position.y-= 0.2;
+			osd.update();
+			lyte.update();
         },function(){
         	
         },function(){
+        	fadeOut(44100*8,function(){
+        		now.we.crash.the.demo.because.it.is.the.fastest.way.to.stop(":D");
+        	});
         })
           ];
 		

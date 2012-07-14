@@ -8,7 +8,7 @@ ServerClass = BaseHTTPServer.HTTPServer
 
 
 HandlerClass.protocol_version = 'HTTP/1.1'
-httpd = ServerClass(('127.0.0.1', 80), HandlerClass)
+httpd = ServerClass(('', 80), HandlerClass)
 
 sa = httpd.socket.getsockname()
 
