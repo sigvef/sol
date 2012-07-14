@@ -179,7 +179,6 @@ function drawImage(img,startx,starty){
 
 
 function newCameraMovement(movementTime, posx, posy, posz, rotx, roty, rotz, tarx,tary,tarz){
-	console.log("CAMERA STARTED");
 	cameraMovementDone = false;
 	deepCopy3DObject(camera, startcamera);
 	startcamera.time = t;
@@ -226,7 +225,6 @@ function update() {
 		}else{
 			deepCopy3DObject(goalcamera, camera);
 			cameraMovementDone = true;
-			console.log("CAMERA DONE!");
 		}
 	}
 	
@@ -463,7 +461,6 @@ function init() {
 		if(e.midi_channel == 13 && e.type == 0x9){
 			active_scene++;
 			SCENES[active_scene].onenter();
-			console.log("active scene is now",active_scene,e);
 		}
 	});
 	midi.add_callback(function(e){

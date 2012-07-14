@@ -3,7 +3,6 @@
 function Track(track_data, midi){
     this.midi = midi;
     this.data = track_data;
-    debug("track length",this.data.length);
     this.events = [];
     this.tracker = 0;
     this.active = true;
@@ -135,16 +134,13 @@ function Track(track_data, midi){
 
 /* A midi file */
 function Midi(file){
-    debug("Starting to parse a midi file!");
     this.data = file;
     var size = file.length; 
     this.tracker = 10; //skip to number of tracks in header
     this.tracks = [];
     this.callbacks = [];
     this.tracks.length = this.read_word(); 
-    debug("tracks_length", this.tracks.length);
     this.time_division = this.read_word();
-    debug("time_division", this.time_division);
 
     /* if the most significant bit is set */
     if(this.time_division&0x8000){
@@ -169,9 +165,7 @@ function Midi(file){
         var track_length = this.read_dword();
 
         /* parse the track */
-        debug("Beginning to parse track",i);
         this.tracks[i] = new Track(this.data.slice(this.tracker, this.tracker+track_length), this);    
-        debug("track",i,"complete");
 
         /* advance the tracker to the next track */
         this.tracker += track_length;
@@ -274,11 +268,6 @@ function read_vlf(){
     return (vlf<<7) | next;
 }
 
-function debug(){
-    if(DEBUG){
-        console.log("[DEBUG] "+new Date().toLocaleTimeString()+":",arguments);
-    }
-}
 
 // Array Remove - By John Resig (MIT Licensed)
 Array.prototype.remove = function(from, to) {

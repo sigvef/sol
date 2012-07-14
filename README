@@ -13,13 +13,7 @@ the  --allow-file-access-
 from-files  flag  if  you
 want   to  run  the  demo
 directly  from  the  file
-system.    If   you  have
-python installed, you can
-run    our   conveniently
-bundled   server.py  from
-the demo   directory  and
-direct  your  browser  to
-localhost:80.
+system.
 
 Music, graphics and code:
         stiaje
