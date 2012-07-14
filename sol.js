@@ -124,19 +124,22 @@ SCENES = [
         	
         },function(){
         	 cameratarget = ORIGO;
-        	 camera.position.y = 200;
+        	 camera.position.y = 300;
         	 osd.show(TEXTS[6]);
-        	fadeOut(44100*8,function(){
-        		now.we.crash.the.demo.because.it.is.the.fastest.way.to.stop(":D");
-        	});
         }),
         
         /* fade to black and exit or whatever */
         new Scene(function(){
-        	
+        	someRandomHexagonGridEffect();
+			camera.position.y-= 0.2;
+			osd.update();
+			lyte.update();
         },function(){
         	
         },function(){
+        	fadeOut(44100*8,function(){
+        		now.we.crash.the.demo.because.it.is.the.fastest.way.to.stop(":D");
+        	});
         })
           ];
 		
