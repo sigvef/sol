@@ -2,7 +2,7 @@ t = 0;
 play_forward_trigger = 0;
 function Mixer(){
     this.ax = new webkitAudioContext();
-    this.jsnode = this.ax.createJavaScriptNode(1024*2,1,2);
+    this.jsnode = this.ax.createJavaScriptNode(1024*4,1,2);
     this.note_number = 0;
     this.velocity = 0;
 
