@@ -2,19 +2,26 @@ DEBUG = false;
 ORIGO = new THREE.Vector3(0, 0, 0);
 cameraMovementDone = true;
 
+
 TEXTS = [
         "HONEYCOMB BY NINJADEV",
         "(OUR FIRST DEMO EVER :3)",
-        "SOME TEXT HERE, YO",
-        "SOME OTHER TEXT HERE"
+        "IT HAS A SYNTH, SOME 3D OBJECTS, SOME SCANLINES, AND A CRAPPILY CONTROLLED CAMERA",
+        "WE REALLY ONLY KNOW 2D, SO WE BUILT A SCREEN FOR 2D EFFECTS",
+        "SO WE COULD ROTATE A CUBE",
+        "AND ROTATE AROUND THAT CUBE",
+        "ANYWAY, THANK YOU FOR A NICE PARTY :)"
          ];
+
+
+note_midicallback = function(e){};
 
 active_scene = 0;
 /* please specify these in chrono order! */
 /* yes, because i am lazy */
 SCENES = [
           /* introduction */
-         new Scene(0,290816, function(){
+         new Scene(function(){
 			updateHexagonGrid();
 			lyte.update();
 			osd.update();
@@ -26,7 +33,7 @@ SCENES = [
          }),
          
          /* follow the lyte */
-         new Scene(290816, 884736, function(){
+         new Scene(function(){
 			updateHexagonGrid();
 			lyte.update();
 			osd.update();
@@ -39,7 +46,7 @@ SCENES = [
          }),
          
          /* some other scene */
-         new Scene(884736, 1462272, function(){
+         new Scene(function(){
 			updateHexagonGrid();
 			camera.position.x = 200*Math.sin(t/40000);
 			camera.position.z = 200*Math.cos(t/40000);
@@ -51,11 +58,20 @@ SCENES = [
          },
          function(){
         	 cameratarget = ORIGO;
+        	 osd.show(TEXTS[2]);
          }),
          
          /* need some content here */
-         new Scene(1462272,2048000,function(){
+         new Scene(function(){
 			updateHexagonGrid();
+			for(var x=0;x<side;x++){
+				for(var y=0;y<side;y++){
+					var toffset = t;
+					var on = Math.sin(x/2+toffset) + Math.cos(y/2+2*toffset) > 0;
+					cubes[x*side+y].mesh.material = materials[+on];
+				}
+			}
+			
 			lyte.update();
 			osd.update();
          },
@@ -63,12 +79,13 @@ SCENES = [
          },
          function(){
         	 cameratarget = ORIGO;
-        	 newCameraMovement(100000,0,300,0);
-        	 osd.show(TEXTS[2]);
+        	 newCameraMovement(400000,1,300,0);
+        	 osd.show(TEXTS[3]);
          }),
          
+         
          /* 3d2d3d */
-         new Scene(2048000, 2686976, function(){
+         new Scene(function(){
 			updateHexagonGrid();
 			kewbe.update();
 			osd.update();
@@ -77,12 +94,29 @@ SCENES = [
         	kewbe.render();
          },function(){
         	 cameratarget = ORIGO;
-        	 osd.show(TEXTS[3]);
+        	 osd.show(TEXTS[4]);
+         }),
+         
+         /* more 3d2d3d */
+         new Scene(function(){
+			updateHexagonGrid();
+			kewbe.update();
+			osd.update();
+			lyte.update();
+			camera.position.x = 440*Math.sin(t/30000);
+			camera.position.y = 440*Math.cos(t/40000);
+			camera.position.z = 440*Math.sin(t/50000);
+         },function(){
+        	kewbe.render();
+         },function(){
+        	 cameratarget = ORIGO;
+        	 osd.show(TEXTS[5]);
+        	 note_midicallback = function(){};
          }),
          
          
          /* our names or something */
-        new Scene(3215360,4071424,function(){
+        new Scene(function(){
         	someRandomHexagonGridEffect();
 			camera.position.y-= 0.2;
 			osd.update();
@@ -91,15 +125,18 @@ SCENES = [
         	
         },function(){
         	 cameratarget = ORIGO;
+        	 osd.show(TEXTS[6]);
+        	fadeOut(44100*4,function(){
+        		now.we.crash.the.demo.because.it.is.the.fastest.way.to.stop(":D");
+        	});
         }),
         
         /* fade to black and exit or whatever */
-        new Scene(4071424,6000000,function(){
+        new Scene(function(){
         	
         },function(){
         	
         },function(){
-        	fadeOut(44100);
         })
           ];
 		
@@ -137,18 +174,9 @@ function drawImage(img,startx,starty){
 	}
 }
 
-function newRandomCameraMovement(movementTime){
-	newCameraMovement(movementTime,
-		600*(Math.random()-0.5),
-		600*(Math.random()-0.5),
-		600*(Math.random()-0.5),
-		600*(Math.random()-0.5),
-		600*(Math.random()-0.5),
-		600*(Math.random()-0.5)
-	);
-}
 
 function newCameraMovement(movementTime, posx, posy, posz, rotx, roty, rotz, tarx,tary,tarz){
+	console.log("CAMERA STARTED");
 	cameraMovementDone = false;
 	deepCopy3DObject(camera, startcamera);
 	startcamera.time = t;
@@ -195,6 +223,7 @@ function update() {
 		}else{
 			deepCopy3DObject(goalcamera, camera);
 			cameraMovementDone = true;
+			console.log("CAMERA DONE!");
 		}
 	}
 	
@@ -258,16 +287,16 @@ function OSD(){
 
 OSD.prototype.render = function(){
 	tdx.fillStyle = "rgba(0,0,0,"+(this.opacity/2)+")";
-	tdx.fillRect(this.boxstart, 7*GU, this.boxwidth*Math.sqrt(this.text.length/this.idealtextlength), GU);
+	tdx.fillRect(this.boxstart*GU, 7*GU, GU*this.boxwidth*Math.sqrt(this.text.length/this.idealtextlength), GU);
 	tdx.fillStyle = "rgba(255,255,255,"+this.opacity+")";
-	tdx.fillText(this.text.substring(0, this.textlength),this.boxstart+.25*GU, 7.25*GU);
+	tdx.fillText(this.text.substring(0, this.textlength),GU*(this.boxstart+.25), 7.25*GU);
 }
 
 OSD.prototype.show = function(text){
 	this.text = text;
 	this.t = 0;
-	this.boxstart = GU;
-	this.boxwidth = 4*GU;
+	this.boxstart = 1;
+	this.boxwidth = 4;
 	this.textlength = 0;
 	this.opacity = 1;
 }
@@ -275,12 +304,12 @@ OSD.prototype.show = function(text){
 OSD.prototype.update = function(){
 	
 	if(this.t <= 100){
-		this.boxstart = smoothstep(0, GU, this.t/100);
-		this.boxwidth = smoothstep(0, 4*GU*Math.sqrt(this.text.length/this.idealtextlength), Math.min(this.t/50,1));
+		this.boxstart = smoothstep(0, 1, this.t/100);
+		this.boxwidth = smoothstep(0, 4*Math.sqrt(this.text.length/this.idealtextlength), Math.min(this.t/50,1));
 	}
 	if(this.t > 50 && this.t <= 150){
 		this.textlength = 0|smoothstep(0, this.text.length, Math.min((this.t-50)/10,1))+1;
-	}else if(this.t > 200){
+	}else if(this.t > 200*this.text.length/this.idealtextlength){
 		this.opacity = smoothstep(1,0,Math.min((this.t-200)/50,1));
 	}
 	
@@ -294,6 +323,7 @@ function render() {
 	/* render the 2d canvas */
 	tdx.clearRect(0,0,twoDCanvas.width, twoDCanvas.height);
 	osd.render(); //yah, we just always render the osd
+	
 	if(t < fadeGoalTime){
 		tdx.fillStyle = "rgba(0,0,0,"+lerp(fadeStart,fadeGoal, (t-fadeStartTime)/(fadeGoalTime-fadeStartTime))+")";
 		tdx.fillRect(0,0,16*GU,9*GU);
@@ -301,6 +331,9 @@ function render() {
 		tdx.fillStyle = "rgba(0,0,0,"+fadeGoal+")";
 		tdx.fillRect(0,0,16*GU,9*GU);
 		fadeGoalTime = 0;
+		if(fadeGoal = 1 && fadeFn){
+			fadeFn();
+		}
 	}
 	
 	SCENES[active_scene].render();
@@ -310,16 +343,14 @@ function render() {
 	
 }
 
-function Scene(starttime,endtime,update,render, onenter){
-	this.starttime = starttime;
-	this.endtime = endtime;
+function Scene(update,render, onenter){
 	this.update = update;
 	this.render = render;
 	this.onenter = onenter;
 }
 
 function vtv(a, b) {
-	for ( var i = 0; i <= 1; i += 0.1) {
+	for ( var i = 0; i <= 1; i += 0.05) {
 		var intensity = lerp(a.intensity, b.intensity, i);
 		var x = 0 | lerp(a.hexx, b.hexx, i);
 		var y = 0 | lerp(a.hexy, b.hexy, i);
@@ -443,6 +474,7 @@ function init() {
 	fadeGoalTime = 0;
 	fadeStart = 0;
 	fadeGoal = 0;
+	fadeFn = undefined;
 	fadeIn(100000);
 	/* for good measure */
 	resize();
@@ -457,11 +489,12 @@ function fadeIn(duration){
 	fadeGoal = 0;
 }
 
-function fadeOut(duration){
+function fadeOut(duration,fn){
 	fadeStartTime = t;
 	fadeGoalTime = t+duration;
 	fadeStart = 0;
 	fadeGoal = 1;
+	fadeFn = fn;
 }
 
 function createSkybox(url){

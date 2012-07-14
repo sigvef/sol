@@ -47,7 +47,6 @@ window.requestAnimFrame = (function(){
             function bootstrap(){
             	document.body.webkitRequestFullScreen();
             	document.addEventListener("keydown",function(e){
-            		console.log(e.keyCode);
             		if(e.keyCode == /*ESC*/ 27){
             			window.open('', '_self', ''); //bug fix
 	            		window.close();	
