@@ -45,7 +45,6 @@ function setLoadingBar(completed,fn){
 }
 
 function bootstrap(){
-	document.body.webkitRequestFullScreen();
 	document.addEventListener("keydown",function(e){
 		if(e.keyCode == /*ESC*/ 27){
 			window.open('', '_self', ''); //bug fix
