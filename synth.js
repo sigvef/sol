@@ -36,7 +36,7 @@ function Mixer(){
     this.instruments = [];
     for(var i=0;i<14;i++){
         this.instruments[i] = new Instrument(i);
-        this.instruments[i].generate = instruments(i); //setter ulike synthfunksjoner på ulike midikanaler
+        this.instruments[i].generate = instruments(i);
     }
 
     this.handle_event = function(e){
@@ -52,7 +52,7 @@ function Mixer(){
     this.analyser.fftSize = 1024;
     this.convolver = this.ax.createConvolver();
     this.gainNode = this.ax.createGainNode();
-    var buffer = this.ax.createBuffer(2,44110*3,44110);
+    var buffer = this.ax.createBuffer(2,44100*3,44100);
     var channeldatal = buffer.getChannelData(0);
     var channeldatar = buffer.getChannelData(1);
     for(var i=0;i<10000;i++){
