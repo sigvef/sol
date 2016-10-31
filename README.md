@@ -1,3 +1,12 @@
+![](https://i.imgur.com/n70q0Jp.png)
+
+[YouTube](https://www.youtube.com/watch?v=8KCCiSwM8jg)
+
+[Pouët](http://www.pouet.net/prod.php?which=59501)
+
+---
+
+```
 #=======================#
 | HONEYCOMB BY NINJADEV |
 #=======================#
@@ -20,3 +29,4 @@ Music, graphics and code:
         iverjo
        cristea
        sigveseb
+```
